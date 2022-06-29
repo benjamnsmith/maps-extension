@@ -5,12 +5,13 @@
     "permissions": [
         "activeTab",
         "storage",
-        "tabs"
+        "tabs",
+        "webNavigation"
     ],
-    "background": {
-        "service_worker": "main.bundle.js"
-    },
     "action": {
         "default_popup": "index.html"
+    },
+    "background": {
+        "service_worker": "background.js"
     }
 }
