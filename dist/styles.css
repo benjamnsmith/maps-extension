@@ -2,32 +2,38 @@
     font-family: "Oswald";
     background-color: #aae;
     border-radius: 5px;
+    width: 300px;
   }
   
-  .first_time {
+.first_time {
     background-color: #aae;
     font-family: "Oswald";
-  }
+}
   
-  body {
+body {
     background-color: #fbceb1;
-  }
+}
   
-  input {
+input {
     border-style: double;
     border-radius: 5px;
     margin-left: 20px;
-  }
+}
   
-  div {
+div {
     border-style: none;
     border-radius: 5px;
-  }
+}
   
-  #form_header {
+#form_header {
     margin-left: 3%;
-  }
+}
   
-  .general_info {
+.general_info {
     background-color: #cebad3;
-  }
+}
+
+#welcome_name {
+    color: #734f7c;
+    font-weight: bold;
+}

@@ -1,4 +1,4 @@
 /node_modules
 package-lock.json
 .DS_Store
-dist/main.popup.js
+/dist/main.popup.js
