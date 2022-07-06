@@ -1,0 +1,33 @@
+.title {
+    font-family: "Oswald";
+    background-color: #aae;
+    border-radius: 5px;
+  }
+  
+  .first_time {
+    background-color: #aae;
+    font-family: "Oswald";
+  }
+  
+  body {
+    background-color: #fbceb1;
+  }
+  
+  input {
+    border-style: double;
+    border-radius: 5px;
+    margin-left: 20px;
+  }
+  
+  div {
+    border-style: none;
+    border-radius: 5px;
+  }
+  
+  #form_header {
+    margin-left: 3%;
+  }
+  
+  .general_info {
+    background-color: #cebad3;
+  }
