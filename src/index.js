@@ -18,6 +18,7 @@ function init() {
     console.log(
       `Got value ${saved_mpg} mpg and name ${user_name} from localStorage`
     );
+    chrome.runtime.sendMessage({data:`${saved_mpg}`})
   }
   if (new_user) {
     form.style.display = "block";
@@ -72,11 +73,19 @@ function updateWelcomeMessage(sw){
 form.addEventListener("submit", (e) => handleSubmit(e));
 clear.addEventListener("click", (e) => reset(e));
 
-chrome.runtime.onMessage.addListener(
-  function(message, sender, sendResponse){
-    var msg = message.data;
-    updateWelcomeMessage(msg);
-  }
-);
+// chrome.runtime.onMessage.addListener(
+//   function(message, sender, sendResponse){
+//     console.log(`Extension script got message: ${message.data}`);
+//     var msg = message.data;
+//     updateWelcomeMessage(msg);
+//   }
+// );
+
+// chrome.runtime.onMessage.addListener(
+//   function(request, sender, sendResponse) {
+//     console.log(`Received ${request.data}`);
+//     let msg = calculateCost(request.data);
+//     sendResponse({cost:`${msg}`});
+//   });
 
 init();
