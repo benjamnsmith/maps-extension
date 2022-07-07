@@ -5,10 +5,7 @@ const name = document.querySelector("#name");
 const mpg = document.querySelector("#mpg");
 const clear = document.querySelector(".clear");
 
-function round(num) {
-  return +(Math.round(num + "e+2") + "e-2");
-}
-
+// POPUP WINDOW FUNCTIONS
 function init() {
   var saved_mpg = localStorage.getItem("mpg");
   var user_name = localStorage.getItem("name");
@@ -33,9 +30,6 @@ function init() {
 function showWelcomeMessage() {
   form.style.display = "none";
   info.style.display = "block";
-  if (name === null) {
-    name = "user";
-  }
   document.getElementById("welcome_name").textContent =
     localStorage.getItem("name") + "!";
   document.getElementById("welcome_mpg").textContent =
@@ -65,6 +59,24 @@ function reset(event) {
   init();
 }
 
+
+// LISTEN FOR UPDATES FROM BACKGROUND.JS AND UPDATE ACCORDINGLY
+function updateWelcomeMessage(sw){
+  var banner = document.getElementById("maps_bool");
+  //sw ? banner.textContent = "GOOGLE MAPS" : banner.textContent = "NOT GOOGLE MAPS";
+  //banner.textContent = sw ? "GOOGLE MAPS" : "NOT GOOGLE MAPS";
+  banner.textConent = sw;
+}
+
+// RUN UPON EXTENSION INIT
 form.addEventListener("submit", (e) => handleSubmit(e));
 clear.addEventListener("click", (e) => reset(e));
+
+chrome.runtime.onMessage.addListener(
+  function(message, sender, sendResponse){
+    var msg = message.data;
+    updateWelcomeMessage(msg);
+  }
+);
+
 init();
