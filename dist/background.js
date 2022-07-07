@@ -1,42 +1,22 @@
-async function getCurrentTab() {
-    let queryOptions = { active: true, lastFocusedWindow: true };
-    // `tab` will either be a `tabs.Tab` instance or `undefined`.
-    let [tab] = await chrome.tabs.query(queryOptions);
-    if (tab !== undefined) {
-        console.log(`Queried tabs, got ${tab.url}`)
-    } else {
-        console.log("Queried tabs, got null");
-    }
-    return tab.url;
+var saved_mpg = -10000;
+
+function calculateCost(distance) {
+    var currentGasPrice = 4.5;
+    //var percent = distance / localStorage.getItem("mpg");
+  
+    var percent = distance / 24; 
+    console.log(`A trip of ${distance} will cost ${(percent * currentGasPrice).toFixed(2)}`)
+    return (percent * currentGasPrice).toFixed(2);
   }
 
-
-async function handlePage() {
-    let url;
-    try {
-        url = await getCurrentTab();
-    } catch(e) {
-        console.log(e);
-        return;
-    }
-    
-    if (url === null) {
-        console.log("handlePage() received null url")
-    }
-    url = url.toString();
-    if (url.includes("google.com/maps/dir")) {
-        console.log("Page should be changed");
-    } else {
-        console.log("Page should not be altered")
-    }
-    try {
-        chrome.runtime.sendMessage({data:`${url}`});
-    } catch (e) {
-        console.log(e);
-        return;
-    }
-    
-}
-
-chrome.webNavigation.onCompleted.addListener(handlePage);
-
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      let ret_vals = [];
+      var recvd = request.data.split(',');
+      for (idx in recvd) {
+        var val = ((recvd[idx]).split(' '))[0];
+        ret_vals.push(calculateCost(val));
+      }
+      
+      sendResponse({cost:`${ret_vals}`});
+    });
