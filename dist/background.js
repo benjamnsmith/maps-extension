@@ -4,7 +4,7 @@ function calculateCost(distance) {
     var currentGasPrice = 4.5;
     var percent = distance / saved_mpg;
   
-    console.log(`A trip of ${distance} will cost ${(percent * currentGasPrice).toFixed(2)}`)
+    console.log(`A trip of ${distance} will cost ${(percent * currentGasPrice).toFixed(2)} at ${saved_mpg} MPG`)
     return (percent * currentGasPrice).toFixed(2);
   }
 
@@ -15,6 +15,9 @@ chrome.runtime.onMessage.addListener(
             console.log(`Received MPG ${request.data} message`);
             console.log(`New saved_mpg is ${saved_mpg}`);
             return;
+        }
+        if (saved_mpg < 0) {
+            sendResponse({cost:`-100`});
         }
       let ret_vals = [];
       var recvd = request.data.split(',');

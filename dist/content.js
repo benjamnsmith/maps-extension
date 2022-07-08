@@ -39,6 +39,10 @@ function handlePage() {
         }
         console.log(text);
         chrome.runtime.sendMessage({data:`${text}`}, function(response) {
+            if (response.cost.slice(0,1) === "-"){
+                console.log("No saved_mpg");
+                return;
+            }
             let resps = response.cost.split(',');
             for (idx in resps) {
                 console.log(`${text[idx]} will cost ${resps[idx]}`);

@@ -2,7 +2,8 @@
     font-family: "Oswald";
     background-color: #aae;
     border-radius: 5px;
-    width: 300px;
+    /*width: 300px;*/
+    padding: 3px;
   }
   
 .first_time {
