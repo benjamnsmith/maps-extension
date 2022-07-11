@@ -1,3 +1,8 @@
+// OPTIONS.JS
+// handle form submissions, data saving, data changing
+// all data should be passed to background.js upon save
+// utilize chrome storage so all scripts can access data
+
 const table = document.querySelector(".history_table");
 const form = document.querySelector("#entry_form");
 const info = document.querySelector(".general_info");
@@ -31,8 +36,6 @@ function showWelcomeMessage() {
   form.style.display = "none";
   info.style.display = "block";
 
-  chrome.runtime.sendMessage({data:`MPG ${localStorage.getItem("mpg")}`});
-
   document.getElementById("welcome_name").textContent =
     localStorage.getItem("name") + "!";
   document.getElementById("welcome_mpg").textContent =
@@ -45,6 +48,8 @@ function handleSubmit(event) {
   console.log(`Received ${name.value} and ${mpg.value} from form submission`);
   localStorage.setItem("mpg", mpg.value);
   localStorage.setItem("name", name.value);
+  chrome.storage.sync.set({mpg:`${mpg.value}`});
+  chrome.storage.sync.set({name:`${name.value}`});
   showWelcomeMessage();
 }
 
