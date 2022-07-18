@@ -2,11 +2,6 @@ var saved_mpg = -10000;
 var name = "";
 
 function calculateCost(distance) {
-    var saved_mpg = -100;
-    chrome.storage.sync.get(['mpg'], function(result) {
-        console.log(`retrieved value ${result.mpg} from storage`);
-        saved_mpg = result.mpg;
-    });
     console.log(`calculateCost() with distance as ${distance} and mpg as ${saved_mpg}`)
     var currentGasPrice = 4.5;
     var percent = distance / saved_mpg;
@@ -25,5 +20,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         calculated.push(c);
     }
     console.log(calculated);
-    sendResponse(calculated);
+    sendResponse({cost:`${calculated}`});
 });
+
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+    if (namespace === 'sync' && changes.mpg?.newValue) {
+        console.log("Detected change in chrome storage values");
+        console.log(`Updated storage mpg from ${changes.mpg.oldValue} to ${changes.mpg.newValue}`);
+        saved_mpg = changes.mpg.newValue;
+        console.log(`The saved_mpg is now ${saved_mpg}`);
+    }
+});
+
+function init() {
+    chrome.storage.sync.get(['mpg'], function(res) {
+        console.log(`init() retrieved ${res.mpg}`);
+        saved_mpg = parseInt(res.mpg);
+    })
+}
+
+init();

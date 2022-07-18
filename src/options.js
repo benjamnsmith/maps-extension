@@ -49,7 +49,7 @@ function handleSubmit(event) {
   localStorage.setItem("mpg", mpg.value);
   localStorage.setItem("name", name.value);
   chrome.storage.sync.set({mpg:`${mpg.value}`});
-  chrome.storage.sync.set({name:`${name.value}`});
+  //chrome.storage.sync.set({name:`${name.value}`});
   showWelcomeMessage();
 }
 

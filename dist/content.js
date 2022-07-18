@@ -47,10 +47,7 @@ function handlePage() {
         }
         console.log(text);
         chrome.runtime.sendMessage({data:`${text}`}, function(response) {
-            if (response.cost.slice(0,1) === "-"){
-                console.log("No saved_mpg");
-                return;
-            }
+            console.log(`Received ${response.cost}`);
             let resps = response.cost.split(',');
             for (idx in resps) {
                 console.log(`${text[idx]} will cost ${resps[idx]}`);
@@ -62,4 +59,15 @@ function handlePage() {
     }
 }
 
-handlePage();
+
+/* 
+Wait until all of the objects of the DOM have loaded before trying to access them
+Flow of execution: 
+* readystate: interactive (document event)
+* DOMContentLoaded (document event)
+* readystate: complete (document event)
+* load (window event)
+*/
+window.addEventListener('load', (event) => {
+    handlePage();
+});
