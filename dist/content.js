@@ -68,6 +68,7 @@ Flow of execution:
 * readystate: complete (document event)
 * load (window event)
 */
+
 window.addEventListener('load', (event) => {
     handlePage();
 });
