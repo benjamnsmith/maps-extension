@@ -1,40 +1,83 @@
+:root {
+    --lightsilver: #d5d8db;
+    --platinum: #e8e8e8;
+    --green: #c3ecb2;
+    --blue: #aadaff;
+    --banana: #fff2af;
+    --orange: #f6cf65;
+}
+
+/* Background things */
+.wrapper {
+    display: grid;
+    flex-flow: column;
+    margin: 0;
+    border: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background-color: var(--platinum);
+}
+
+.section {
+    margin: 1rem 2rem;
+    border-radius: 5px;
+    flex-basis: 20%;
+    border: solid;
+    border-color: var(--banana);
+    border-width: medium;
+}
+
+/* Top section*/
 .title {
     font-family: "Oswald";
-    background-color: #aae;
-    border-radius: 5px;
-    /*width: 300px;*/
-    padding: 3px;
+    background-color: var(--green);
+    height: 100px;
+    display: flex;
+    align-items: center;
   }
-  
+
+.title_text {
+    margin: 1rem;
+    font-size: 40px;
+    color: #222326;
+}
+
+/* Bottom section */  
 .first_time {
-    background-color: #aae;
+    background-color: var(--blue);
     font-family: "Oswald";
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    margin-top: 0;
 }
   
-body {
-    background-color: #fbceb1;
+#entry_form {
+    margin-bottom: 1rem;
 }
-  
+
+.field {
+    margin: 5px 0px 0px 0px;
+}
+
 input {
     border-style: double;
     border-radius: 5px;
-    margin-left: 20px;
-}
-  
-div {
-    border-style: none;
-    border-radius: 5px;
-}
-  
-#form_header {
-    margin-left: 3%;
-}
-  
-.general_info {
-    background-color: #cebad3;
+    margin: 0 0 0 10px;
 }
 
-#welcome_name {
-    color: #734f7c;
-    font-weight: bold;
+#mpg {
+    margin: 0 0 0 12px;
+}
+
+#form_header {
+    font-size: 20px;
+    margin-bottom: 0;
+}
+
+button {
+    font-family: "Oswald";
 }

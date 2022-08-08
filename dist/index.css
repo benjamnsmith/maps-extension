@@ -1,0 +1,68 @@
+:root {
+    --lightsilver: #d5d8db;
+    --platinum: #e8e8e8;
+    --green: #c3ecb2;
+    --blue: #aadaff;
+    --banana: #fff2af;
+    --orange: #f6cf65;
+    --text: #222326;
+    --icon-red: #f44336;
+    --icon-grey: #cfd8dc;
+    --icon-black: #455a64
+}
+
+.section {
+    width: 250px;
+    margin: 0;
+    border: solid;
+    border-color: var(--banana);
+    border-width: medium;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+}
+
+body {
+    background-color: var(--platinum);
+    font-family: "Oswald";
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+
+.greeting {
+    background-color: var(--green);
+    margin-bottom: 1rem;
+    display: flex;
+    flex-basis: 100%;
+}
+
+.icon {
+    flex-basis: 25%;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    cursor:  pointer;
+    color: var(--icon-red);
+}
+
+#title {
+    display: inline;
+    color: var(--text);
+    flex-basis: 75%;
+    font-size: 1.3rem;
+}
+
+.info {
+    background-color: var(--blue);
+    margin: 0;
+}
+
+h3, h4 {
+    padding: 0; 
+    margin: 0;
+}
+
+ul {
+    list-style: none;
+    padding: 0 0 0 1rem;
+} 

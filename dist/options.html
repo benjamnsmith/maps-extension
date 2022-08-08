@@ -11,44 +11,34 @@
 		<link rel="stylesheet" href="./styles.css" />
 	</head>
 
-    <body min-width="300px">
-        <div>
-			<div class="title">
-				<h1 class="title">Google Maps Trip Cost Calculator - Options</h1>
+    <body> 
+        <div class = "wrapper">
+			<div class="title section">
+				<h1 class="title_text">Options</h1>
 			  </div>
-			  <div class="first_time">
-				<form id="entry_form">
-				  <div>
-					<h2 id='form_header'>Add your info</h2>
-				  </div>
-				  <div>
+			  <div class="first_time section">
+				<h2 id='form_header'>Add your info</h2>
+                <p class="welcome_message"></p>
+                <form id="entry_form">
+				  <div class="field">
 					<label for='name'>Name</label>
-					<input type='text' id='name'></input>
+					<input type='text' id='name' placeholder='Name'></input>
 				  </div>
-				  <div>
+				  <div class="field">
 					<label for='mpg'>MPG</label>
 					<input type='number' id='mpg'></input>
 				  </div>
+                  <div class="field">
+                      <label for='make'>Make</label>
+                      <input type='text' id='make' placeholder='Make'></input>
+                   </div>
 				  <br>
 				  <button class='submit_info' type='submit'>Submit</button>
+                  <button class='clear' type='reset'>Clear</button>
 				</form>
+
 			  </div>
-			  <div class="general_info">
-				<h2 id="welcome_greeting">You are validated</h2>
-				<span id="maps_bool"></span>
-				<span>Welcome back,</span>
-				<span id="welcome_name"></span>
-				<span id="welcome_mpg"></span>
-				<br>
-				<span>A 10 mile trip will cost you approximately</span>
-				<span id="sample_trip"></span>
-				<span> with current gas prices at $4.50 per gallon</span>
-				<br>
-				<br>
-				<button class='clear'>Clear data</button>
-			  
-			  </div>
-			  
+        </div> 
 			  <script src="main.options.js"></script>
     
     </body>

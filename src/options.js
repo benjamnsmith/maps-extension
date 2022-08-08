@@ -8,39 +8,55 @@ const form = document.querySelector("#entry_form");
 const info = document.querySelector(".general_info");
 const name = document.querySelector("#name");
 const mpg = document.querySelector("#mpg");
-const clear = document.querySelector(".clear");
+const fields = document.querySelectorAll("input");
+var data = [];
+const welcome_header = document.querySelector("#form_header");
+const welcome_message = document.querySelector(".welcome_message");
+
+
 
 // POPUP WINDOW FUNCTIONS
 function init() {
-  var saved_mpg = localStorage.getItem("mpg");
-  var user_name = localStorage.getItem("name");
-  var new_user;
-  if (saved_mpg === null) {
-    new_user = true;
-    console.log("No data found in localStorage");
-  } else {
-    new_user = false;
-    console.log(
-      `Got value ${saved_mpg} mpg and name ${user_name} from localStorage`
-    );
-  }
-  if (new_user) {
-    form.style.display = "block";
-    info.style.display = "none";
-  } else {
-    showWelcomeMessage(user_name, saved_mpg);
-  }
+    var saved_mpg = localStorage.getItem("mpg");
+    var user_name = localStorage.getItem("name");
+    var new_user;
+    if (saved_mpg === null) {
+        new_user = true;
+        console.log("No data found in localStorage");
+    } else {
+        new_user = false;
+        console.log(
+        `Got value ${saved_mpg} mpg and name ${user_name} from localStorage`
+        );
+    }
+    if (! new_user) {
+        data.push(user_name);
+        data.push(saved_mpg);
+        console.log(data);
+        showWelcomeMessage();
+    } else {
+        showNewUserMessage();
+    }
+}
+
+function showNewUserMessage(){
+    console.log("Showing new message");
+    fields[0].setAttribute("placeholder", "Name");
+    fields[1].setAttribute("placeholder", '');
+    fields[2].setAttribute("placeholder", "Make");
+    welcome_header.innerText = "Add your info";
+    welcome_message.innerText = "";
 }
 
 function showWelcomeMessage() {
-  form.style.display = "none";
-  info.style.display = "block";
-
-  document.getElementById("welcome_name").textContent =
-    localStorage.getItem("name") + "!";
-  document.getElementById("welcome_mpg").textContent =
-    "Your saved MPG is " + localStorage.getItem("mpg") + " miles per gallon.";
-  document.getElementById("sample_trip").textContent = "$" + calculateCost(10);
+    console.log("Showing welcome message");
+    console.log(data);
+    for(let i = 0; i < 2; i++){
+        fields[i].setAttribute("placeholder", data[i]);
+    }
+    welcome_header.innerText = "Welcome back, " + data[0]+ "!";
+    welcome_message.innerText = "You are able to see your saved settings below and update them if necessary";
+    console.log("End of welcome message");
 }
 
 function handleSubmit(event) {
@@ -49,7 +65,12 @@ function handleSubmit(event) {
   localStorage.setItem("mpg", mpg.value);
   localStorage.setItem("name", name.value);
   chrome.storage.sync.set({mpg:`${mpg.value}`});
-  //chrome.storage.sync.set({name:`${name.value}`});
+  data[0] = name.value;
+  data[1] = mpg.value;
+   
+    name.value = '';
+    mpg.value = '';
+    //chrome.storage.sync.set({name:`${name.value}`});
   showWelcomeMessage();
 }
 
@@ -61,10 +82,11 @@ function calculateCost(distance) {
 }
 
 function reset(event) {
-  event.preventDefault();
-  console.log("Clearing localStorage");
-  localStorage.clear();
-  init();
+    event.preventDefault();
+    console.log("Clearing localStorage");
+    localStorage.clear();
+    data = [];
+    init();
 }
 
 
@@ -76,6 +98,6 @@ function updateWelcomeMessage(sw){
 
 // RUN UPON EXTENSION INIT
 form.addEventListener("submit", (e) => handleSubmit(e));
-clear.addEventListener("click", (e) => reset(e));
+form.addEventListener("reset", (e) => reset(e));
 
 init();

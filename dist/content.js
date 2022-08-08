@@ -30,13 +30,7 @@ function getCurrentTab() {
 
 function handlePage() {
     // TODO: remove this check, only have content run on <https://google.com/maps/dir/*>
-    let url = getCurrentTab();
-    if (url === null) {
-        console.log("handlePage() received null url");
-    }
-    url = url.toString();
-    console.log(`content script got URL: ${url}`);
-    if (url.includes("google.com/maps/dir")) {
+    //console.log(`content script got URL: ${url}`);
         console.log("Page should be changed");
 
         // LOCATE TRIP DISTANCE AND PASS TO EXTENSION
@@ -54,9 +48,6 @@ function handlePage() {
                 dists[idx].textContent = text[idx] + " ($" + resps[idx] + ")";
             }
         });
-    } else {
-        console.log("Page should not be altered");
-    }
 }
 
 
