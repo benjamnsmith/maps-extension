@@ -30,9 +30,9 @@
         "default_popup": "index.html"
     },
     "icons": {
-        "16": "/images/tmp-logo.png",
-        "32": "/images/tmp-logo.png",
-        "48": "/images/tmp-logo.png",
-        "128": "/images/tmp-logo.png"
+        "16": "/images/gas-icon-16.png",
+        "32": "/images/gas-icon-32.png",
+        "48": "/images/gas-icon-64.png",
+        "128": "/images/gas-icon-128.png"
     }
 }
