@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Google Maps Trip Cost",
     "description": "Save your car's MPG and get real-time updated trip costs, seen right in google maps.",
-    "version": "1.1",
+    "version": "1.4",
     "permissions": [
         "activeTab",
         "storage",
@@ -15,7 +15,7 @@
     "options_page": "options.html",
     "content_scripts": [
         {
-          "matches": ["https://google.com/maps/dir/*"],
+          "matches": ["https://*.google.com/maps/dir/*"],
           "js": ["content.js"],
           "run_at": "document_idle"
         }

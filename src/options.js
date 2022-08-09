@@ -99,5 +99,10 @@ function updateWelcomeMessage(sw){
 // RUN UPON EXTENSION INIT
 form.addEventListener("submit", (e) => handleSubmit(e));
 form.addEventListener("reset", (e) => reset(e));
+form.addEventListener("close", (e) => {
+    e.preventDefault();
+    window.close();
+});
+
 
 init();

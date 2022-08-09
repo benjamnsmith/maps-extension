@@ -1,5 +1,5 @@
 // CONTENT.JS
-// Run in the contect of the webpage only after the DOM is fully loaded,
+// Run in the context of the webpage only after the DOM is fully loaded,
 // as specified in manifest.json ()
 
 function getDistance(){
@@ -29,13 +29,11 @@ function getDistance(){
 function handlePage() {
     console.log("Page should be changed");
 
-    // LOCATE TRIP DISTANCE AND PASS TO EXTENSION
     let dists = getDistance();
 
     // the divs containing the trip cost take so long to load sometimes
     // my query on page load returns [] sometimes because they haven't been populated
     // USUALLY waiting a second and re-trying works, but on suuuuper slow connections, this will break
-    
     if (dists.length === 0) {
         throw 'NoElementsFound';
     }
