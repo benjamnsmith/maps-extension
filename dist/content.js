@@ -24,30 +24,34 @@ function getDistance(){
     return results;
 }
 
-function getCurrentTab() {
-    return window.location.href;
-}
+
 
 function handlePage() {
-    // TODO: remove this check, only have content run on <https://google.com/maps/dir/*>
-    //console.log(`content script got URL: ${url}`);
-        console.log("Page should be changed");
+    console.log("Page should be changed");
 
-        // LOCATE TRIP DISTANCE AND PASS TO EXTENSION
-        let dists = getDistance();
-        var text = [];
-        for (const dist of dists) {
-            text.push(dist.textContent);
+    // LOCATE TRIP DISTANCE AND PASS TO EXTENSION
+    let dists = getDistance();
+
+    // the divs containing the trip cost take so long to load sometimes
+    // my query on page load returns [] sometimes because they haven't been populated
+    // USUALLY waiting a second and re-trying works, but on suuuuper slow connections, this will break
+    
+    if (dists.length === 0) {
+        throw 'NoElementsFound';
+    }
+    var text = [];
+    for (const dist of dists) {
+        text.push(dist.textContent);
+    }
+    console.log(text);
+    chrome.runtime.sendMessage({data:`${text}`}, function(response) {
+        console.log(`Received ${response.cost}`);
+        let resps = response.cost.split(',');
+        for (idx in resps) {
+            console.log(`${text[idx]} will cost ${resps[idx]}`);
+            dists[idx].textContent = text[idx] + " ($" + resps[idx] + ")";
         }
-        console.log(text);
-        chrome.runtime.sendMessage({data:`${text}`}, function(response) {
-            console.log(`Received ${response.cost}`);
-            let resps = response.cost.split(',');
-            for (idx in resps) {
-                console.log(`${text[idx]} will cost ${resps[idx]}`);
-                dists[idx].textContent = text[idx] + " ($" + resps[idx] + ")";
-            }
-        });
+    });
 }
 
 
@@ -61,5 +65,11 @@ Flow of execution:
 */
 
 window.addEventListener('load', (event) => {
-    handlePage();
+    try{
+        console.log("New try/catch block");
+        handlePage();
+    } catch(error) {
+        console.log("Error, trying again in 1s");
+        setTimeout(handlePage, 1000);
+    }
 });
