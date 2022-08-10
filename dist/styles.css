@@ -24,7 +24,6 @@
   .section {
     margin: 1rem 2rem;
     border-radius: 5px;
-    flex-basis: 20%;
     border: solid;
     border-color: var(--banana);
     border-width: medium;
@@ -84,13 +83,13 @@
   
   .info_display {
     /*   border: solid black; */
-    flex-basis: 25%;
+    flex-basis: 33%;
     margin: 1rem;
   }
   
   .vehicles_display {
     /*   border: solid black; */
-    flex-basis: 75%;
+    flex-basis: 66%;
     display: flex;
     flex-flow: column;
     margin: 1rem;
@@ -122,6 +121,21 @@
   
   .content {
     display: flex;
+    flex-flow: column;
     background-color: var(--blue);
     font-family: "Oswald";
+    height: 330px;
+  }
+
+  .warning {
+    color: red;
+    font-family: 'Courier New', Courier, monospace;
+    display: none;
+    margin: 15px 10px 5px 10px;
+  }
+
+  @media (min-width: 500px) {
+    .content {
+        flex-flow: row;
+    }
   }

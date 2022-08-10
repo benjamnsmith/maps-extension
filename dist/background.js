@@ -14,14 +14,15 @@ function calculateCost(distance) {
 
 function getMPG() {
     chrome.storage.sync.get(['mpg'], function(res) {
-        console.log(`init() retrieved ${res.mpg}`);
+        console.log(`getMPG() retrieved ${res.mpg}`);
         saved_mpg = parseInt(res.mpg);
     })
 }
 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    getMPG();
+    // TODO need to wait on getMPG before calling calculate cost
+    //getMPG();
     let recvd = [];
     let calculated = [];
     recvd = message.data.split(",");
@@ -38,3 +39,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.log(error);
     }
 });
+
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+      console.log(
+        `Storage key "${key}" in namespace "${namespace}" changed.`,
+        `Old value was "${oldValue}", new value is "${newValue}".`
+      );
+      if (key === "mpg"){
+        saved_mpg = parseInt(newValue);
+      }
+      
+    }
+  });

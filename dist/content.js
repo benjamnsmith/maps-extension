@@ -64,7 +64,6 @@ Flow of execution:
 
 window.addEventListener('load', (event) => {
     try{
-        console.log("New try/catch block");
         handlePage();
     } catch(error) {
         console.log("Error, trying again in 1s");

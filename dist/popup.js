@@ -5,8 +5,6 @@ const make = document.querySelector(".make");
 const model = document.querySelector(".model");
 const mpg = document.querySelector(".mpg");
 
-var validated;
-
 const user = {
   "name": "Quincy",
   "mpg": 30,
@@ -31,13 +29,7 @@ function displayInfo(){
 
 }
 
-function testLogin(){
-  validated = true;
-  chrome.storage.sync.get(['user'], function(res) {
-    console.log(`init() retrieved ${res.mpg}`);
-    saved_mpg = parseInt(res.mpg);
-})
-}
+
 
 function hideInfo(){
  const info = document.querySelector(".info_text");
@@ -45,16 +37,66 @@ function hideInfo(){
  welc_message.innerText = "You're not logged in. Please enter your info to see your stats!";
 }
 
-function init(){
-  testLogin();
-  if (validated){
-    displayInfo();
-  } else {
-    hideInfo();
-  }
+async function checkLogin(){
+
+  return chrome.storage.sync.get("user", (res) =>{
+      console.log(res);
+      console.log(res.user);
+      if (res.user){
+    
+        user.name = res.user;
+      }
+});
+
 }
 
-init();
+
+const readLocalStorage = async (key) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get([key], function (result) {
+      if (result[key] === undefined) {
+  
+        reject();
+      } else {
+
+        resolve(result[key]);
+      }
+    });
+  });
+};
+
+
+async function render(){
+
+  try {
+    user.name = await readLocalStorage("user");
+    console.log("display queen");
+    displayInfo();
+  } catch (rp) {
+    console.log("embarassed girly");
+    hideInfo();
+  }
+
+  
+}
+
+render();
+
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+    console.log(
+      `Storage key "${key}" in namespace "${namespace}" changed.`,
+      `Old value was "${oldValue}", new value is "${newValue}".`
+    );
+    if (key.toString() === "user"){
+      console.log("the user name got changed baby");
+
+      user.name = newValue;
+      render();
+    }
+    
+  }
+});
 
 
 

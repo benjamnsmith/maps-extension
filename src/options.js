@@ -69,9 +69,9 @@ function memPush(k, v) {
         tmp = "v" + i;
         const cur_v = JSON.parse(memPull(tmp));
         vehicle_items[i].innerText =
-          cur_v.make + " " + cur_v.id + "\n(" + cur_v.mpg + " MPG)";
-        if (JSON.parse(memPull("sel")).model === JSON.parse(memPull(tmp)).model) {
-          vehicle_items[i].style.border = "solid red";
+          cur_v.make + " " + cur_v.model + "\n(" + cur_v.mpg + " MPG)";
+        if (JSON.parse(memPull("sel")).id === JSON.parse(memPull(tmp)).id) {
+          vehicle_items[i].style.border = "5px solid red";
         } else {
           vehicle_items[i].style.border = "solid black";
         }
@@ -91,19 +91,22 @@ function memPush(k, v) {
   
     const fields = document.querySelectorAll(".inp");
   
-    const new_vehicle = {};
+    const new_vehicle = {
+        make: fields[0].value,
+        model: fields[1].value,
+        mpg: fields[2].value,
+        selected: true
+    };
   
-    new_vehicle.make = fields[0].value;
-    new_vehicle.model = fields[1].value;
-    new_vehicle.mpg = fields[2].value;
-    new_vehicle.selected = true;
-  
+    
     var n = parseInt(memPull("num"));
     new_vehicle.id = n;
     var v_name = "v" + n;
     memPush(v_name, JSON.stringify(new_vehicle));
+
     console.log("Selecting newest vehicle");
     memPush("sel", JSON.stringify(new_vehicle));
+    chrome.storage.sync.set({'mpg': `${new_vehicle.mpg}` });
     n++;
     memPush("num", n);
   
@@ -116,12 +119,13 @@ function memPush(k, v) {
     const selected = JSON.parse(memPull(v_id));
     const cur = JSON.parse(memPull("sel"));
   
-    if (cur.model === selected.model) {
+    if (cur.id === selected.id) {
       console.log("This vehicle is already selected");
     } else {
       memPush("sel", JSON.stringify(selected));
   
       console.log(`The new MPG used will be ${selected.mpg}`);
+      chrome.storage.sync.set({'mpg': `${selected.mpg}` });
       render();
     }
   }
@@ -175,6 +179,7 @@ function memPush(k, v) {
     e.preventDefault();
     if (name_entry.value !== "") {
       memPush("name", name_entry.value);
+      chrome.storage.sync.set({'user': `${name_entry.value}` });
       memPush("login", "true");
       render();
     }
@@ -191,14 +196,54 @@ function memPush(k, v) {
     
   });
   
+  var double_check = 0;
+
   document.querySelector(".clear").addEventListener("click", (e) => {
     e.preventDefault();
-    console.log("Cleared");
-    localStorage.clear();
-    name_entry.value = "";
-    render();
+    switch (double_check) {
+        case 0:
+            console.log(double_check);
+            double_check = 1;
+            e.target.style.color = "red";
+            e.target.textContent = "Yes I'm sure";
+            document.querySelector(".warning").style.display = "block";
+            document.querySelector(".close").textContent = "Cancel";
+            console.log("warning!");
+            break;
+        case 1:
+            console.log(double_check);
+            double_check = 0;
+            document.querySelector(".warning").style.display = "none";
+            e.target.style.color = "black";
+            e.target.textContent = "Clear data";
+            console.log("Cleared");
+            localStorage.clear();
+            chrome.storage.sync.clear();
+            name_entry.value = "";
+            
+            render();
+            break;
+    }
+    
+    
   });
-  
+
+  document.querySelector(".close").addEventListener("click", (e) => {
+    e.preventDefault();
+    switch (double_check) {
+        case 1:
+            double_check = 0;
+            document.querySelector(".warning").style.display = "none";
+            document.querySelector(".clear").style.color = "black";
+            document.querySelector(".clear").textContent = "Clear data";
+            e.target.textContent = "Close";
+            break;
+        case 0:
+            window.close();
+            return false;
+    }
+  })
+
   for (vehicle of vehicle_items) {
     vehicle.addEventListener("click", (e) => vehicleClick(e));
   }
