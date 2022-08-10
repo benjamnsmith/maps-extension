@@ -42,7 +42,7 @@ body {
     justify-content: right;
     align-items: center;
     cursor:  pointer;
-    color: var(--icon-red);
+    color: var(--icon-black);
 }
 
 #title {
