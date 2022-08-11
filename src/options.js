@@ -36,9 +36,10 @@ const name_entry = document.querySelector("#name");
 const welcome_message = document.querySelector("#form_header");
 
 // Script items
-const user = {};
+var cur_selected = {};
 const dev = true;
 var currently_authd = false;
+const info_strings = ["make", "model", "mpg"];
 // =============================================
 
 // POPUP WINDOW FUNCTIONS
@@ -93,7 +94,6 @@ function handleSubmit(event) {
     make: fields[0].value,
     model: fields[1].value,
     mpg: fields[2].value,
-    selected: true
   };
 
   var n = parseInt(memPull("num"));
@@ -102,6 +102,7 @@ function handleSubmit(event) {
   memPush(v_name, JSON.stringify(new_vehicle));
 
   console.log("Selecting newest vehicle");
+  cur_selected = new_vehicle;
   memPush("sel", JSON.stringify(new_vehicle));
   chrome.storage.sync.set({ selected: new_vehicle });
   n++;
@@ -109,6 +110,78 @@ function handleSubmit(event) {
 
   render();
 }
+
+
+
+function handleUpdate(){
+  var v_id = cur_selected.id;
+
+  const fields = document.querySelectorAll(".inp");
+  console.log(fields);
+
+  var new_vehicle = {
+    make: ( fields[0].value ? fields[0].value : fields[0].placeholder ),
+    model: ( fields[1].value ? fields[1].value : fields[1].placeholder ),
+    mpg: ( fields[2].value ? fields[2].value : fields[2].placeholder ),
+  };
+
+  new_vehicle.id = v_id;
+  memPush("v" + v_id, JSON.stringify(new_vehicle));
+  memPush("sel", JSON.stringify(new_vehicle));
+  chrome.storage.sync.set({selected: new_vehicle});
+
+  for (var i = 0; i < fields.length; i++){
+    fields[i].value = "";
+    fields[i].placeholder = new_vehicle[info_strings[i]];
+    if (info_strings[i] === "mpg"){
+      fields[i].placeholder += " MPG"
+    }
+  }
+  render();
+
+}
+
+
+
+function hideInfo(){
+  new_car_form.style.display = "none";
+  new_car_button.style.display = "block";
+  document.querySelector(".vehicle_update").style.display = "none";
+
+  document.querySelector("#make").placeholder = "Make";
+  document.querySelector("#model").placeholder = "Model";
+  document.querySelector("#mpg").placeholder = "MPG";
+  document.querySelector("#make").value = "";
+  document.querySelector("#model").value = "";
+  document.querySelector("#mpg").value = "";
+  document.querySelector("h4").innerText = "New vehicle info";
+
+
+}
+
+function showInfo(){
+  console.log("selected:")
+  console.log(cur_selected);
+  
+
+
+  document.querySelector("h4").innerText = "Vehicle Info";
+  new_car_form.style.display = "block";
+  new_car_button.style.display = "none";
+  document.querySelector(".vehicle_submit").style.display = "none";
+  document.querySelector(".vehicle_cancel").style.display = "none";
+  document.querySelector(".vehicle_update").style.display = "block";
+  const fields = document.querySelectorAll(".inp");
+  for (var i = 0; i < fields.length; i++ ) {
+    fields[i].placeholder = cur_selected[info_strings[i]];
+    if (info_strings[i] === "mpg"){
+      fields[i].placeholder += " MPG";
+    }
+  }
+}
+
+
+
 
 function vehicleClick(e) {
   console.log(e.target.className);
@@ -119,9 +192,8 @@ function vehicleClick(e) {
   }
 
   const selected = JSON.parse(memPull(v_id));
-  const cur = JSON.parse(memPull("sel"));
 
-  if (cur.id === selected.id) {
+  if (cur_selected.id === selected.id) {
     console.log("This vehicle is already selected");
   } else {
     memPush("sel", JSON.stringify(selected));
@@ -129,6 +201,10 @@ function vehicleClick(e) {
     console.log(`The new MPG used will be ${selected.mpg}`);
     chrome.storage.sync.set({ selected: selected });
     console.log("pushed selected?");
+
+    cur_selected = selected;
+
+    showInfo();
 
     render();
   }
@@ -179,6 +255,42 @@ document.querySelector(".vehicle_cancel").addEventListener("click", (e) => {
   tog_func();
 });
 
+document.querySelector(".vehicle_update").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  handleUpdate();
+
+});
+
+
+
+function allStorage() {
+
+  var values = [],
+      keys = Object.keys(localStorage),
+      i = keys.length;
+
+  while ( i-- ) {
+      console.log(keys[i], localStorage.getItem(keys[i]) );
+  }
+
+}
+
+document.querySelector(".mem_dump").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  console.log("LOCAL STORAGE:");
+  allStorage();
+
+  const retrieved = chrome.storage.sync.get();
+
+  retrieved.then( (data) => {
+    console.log("CHROME:");
+    console.log(data);
+  });
+
+});
+
 name_entry.addEventListener("blur", (e) => {
   e.preventDefault();
   if (name_entry.value !== "") {
@@ -224,6 +336,7 @@ document.querySelector(".clear").addEventListener("click", (e) => {
       localStorage.clear();
       chrome.storage.sync.clear();
       name_entry.value = "";
+      new_car_form.style.display = "none";
 
       render();
       break;
@@ -249,3 +362,4 @@ document.querySelector(".close").addEventListener("click", (e) => {
 for (vehicle of vehicle_items) {
   vehicle.addEventListener("click", (e) => vehicleClick(e));
 }
+
