@@ -1,141 +1,149 @@
 :root {
-    --lightsilver: #d5d8db;
-    --platinum: #e8e8e8;
-    --green: #c3ecb2;
-    --blue: #aadaff;
-    --banana: #fff2af;
-    --orange: #f6cf65;
-  }
+  --lightsilver: #d5d8db;
+  --platinum: #e8e8e8;
+  --green: #c3ecb2;
+  --blue: #aadaff;
+  --banana: #fff2af;
+  --orange: #f6cf65;
+}
+
+/* Background things */
+.wrapper {
+  display: grid;
+  flex-flow: column;
+  margin: 0;
+  border: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background-color: var(--platinum);
+}
+
+.section {
+  margin: 1rem 2rem;
+  border-radius: 5px;
+  border: solid;
+  border-color: var(--banana);
+  border-width: medium;
+}
+
+/* Top section*/
+.title {
+  font-family: "Oswald";
+  background-color: var(--green);
+  height: 100px;
+  display: flex;
+  align-items: center;
+}
+
+.title_text {
+  margin: 1rem;
+  font-size: 40px;
+  color: #222326;
+}
+
+/* Bottom section */
+
+#entry_form {
+  margin-bottom: 1rem;
+}
+
+.field {
+  margin: 5px 0px 0px 0px;
+}
+
+input,
+select {
+  border-style: double;
+  border-radius: 5px;
+  margin: 0 0 0 10px;
+  width: 250px;
+  background-color: var(--lightsilver);
+}
+
+select {
+  width: 259px;
+}
+
+.new_car_form {
+  display: none;
+}
+
+#form_header {
+  font-size: 20px;
+  margin-bottom: 0;
+}
+
+button {
+  font-family: "Oswald";
+  margin: 10px 0 0 9px;
+}
+
+.info_display {
+  /*   border: solid black; */
+  flex-basis: 33%;
+  margin: 1rem;
+}
+
+.content {
+  display: flex;
+  flex-flow: column;
+  background-color: var(--blue);
+  font-family: "Oswald";
+  height: 400px;
+}
+
+.vehicles_display {
+  /*   border: solid black; */
+  flex-basis: 66%;
+  display: flex;
+  flex-flow: column;
+  margin: 1rem;
+}
+
+.vehicle_grid {
+  flex-basis: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-rows: 150px;
+  grid-gap: 3px;
+}
+
+.vehicle_item {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+  background-color: var(--orange);
+  border: solid black;
+  border-radius: 2px;
+  min-width: 50px;
+  min-height: 50px;
+}
+
+div.vehicle_item > span {
+  font-size: 2.5rem;
   
-  /* Background things */
-  .wrapper {
-    display: grid;
-    flex-flow: column;
-    margin: 0;
-    border: 0;
-    width: 100%;
-    height: 100%;
-  }
-  
-  body {
-    background-color: var(--platinum);
-  }
-  
-  .section {
-    margin: 1rem 2rem;
-    border-radius: 5px;
-    border: solid;
-    border-color: var(--banana);
-    border-width: medium;
-  }
-  
-  /* Top section*/
-  .title {
-    font-family: "Oswald";
-    background-color: var(--green);
-    height: 100px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .title_text {
-    margin: 1rem;
-    font-size: 40px;
-    color: #222326;
-  }
-  
-  /* Bottom section */
-  
-  #entry_form {
-    margin-bottom: 1rem;
-  }
-  
-  .field {
-    margin: 5px 0px 0px 0px;
-  }
-  
-  input,
-  select {
-    border-style: double;
-    border-radius: 5px;
-    margin: 0 0 0 10px;
-    width: 250px;
-    background-color: var(--lightsilver);
-  }
-  
-  select {
-    width: 259px;
-  }
-  
-  .new_car_form {
-    display: none;
-  }
-  
-  #form_header {
-    font-size: 20px;
-    margin-bottom: 0;
-  }
-  
-  button {
-    font-family: "Oswald";
-    margin: 10px 0 0 9px;
-  }
-  
-  .info_display {
-    /*   border: solid black; */
-    flex-basis: 33%;
-    margin: 1rem;
-  }
-  
-  .vehicles_display {
-    /*   border: solid black; */
-    flex-basis: 66%;
-    display: flex;
-    flex-flow: column;
-    margin: 1rem;
-  }
-  
-  .vehicle_grid {
-    flex-basis: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 3%;
-    margin: 1rem;
-  }
-  
-  .vehicle_item {
-    background-color: var(--orange);
-    border: solid black;
-    border-radius: 2px;
-    min-width: 50px;
-    min-height: 50px;
-    max-width: 100px;
-    max-height: 50px;
-    padding: 0.5rem;
-  }
-  
-  .vehicle_item:hover {
-    cursor: pointer;
-  }
-  
+}
+
+.vehicle_item:hover {
+  cursor: pointer;
+}
+
+
+
+.warning {
+  color: red;
+  font-family: "Courier New", Courier, monospace;
+  display: none;
+  margin: 15px 10px 5px 10px;
+}
+
+@media (min-width: 500px) {
   .content {
-    display: flex;
-    flex-flow: column;
-    background-color: var(--blue);
-    font-family: "Oswald";
-    height: 330px;
+    flex-flow: row;
   }
-
-  .warning {
-    color: red;
-    font-family: 'Courier New', Courier, monospace;
-    display: none;
-    margin: 15px 10px 5px 10px;
-  }
-
-  @media (min-width: 500px) {
-    .content {
-        flex-flow: row;
-    }
-  }
+}

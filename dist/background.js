@@ -6,23 +6,30 @@ function calculateCost(distance) {
         console.log("There was an error");
         throw "NegativeMPG"
     }
-    var currentGasPrice = 4.5;
+    var currentGasPrice = 4.0;
     var percent = distance / saved_mpg;
   
     return (percent * currentGasPrice).toFixed(2);
 }
 
-function getMPG() {
-    chrome.storage.sync.get(['mpg'], function(res) {
-        console.log(`getMPG() retrieved ${res.mpg}`);
-        saved_mpg = parseInt(res.mpg);
-    })
-}
+const getMPG = async (key) => {
+    return new Promise((resolve, reject) => {
+      chrome.storage.sync.get([key], function (result) {
+        if (result[key] === undefined) {
+    
+          reject();
+        } else {
+
+          resolve(result[key]);
+        }
+      });
+    });
+  };
 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // TODO need to wait on getMPG before calling calculate cost
-    //getMPG();
+    //saved_mpg = getMPG("mpg");
+    //saved_mpg = parseInt(saved_mpg);
     let recvd = [];
     let calculated = [];
     recvd = message.data.split(",");
@@ -46,7 +53,7 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
         `Storage key "${key}" in namespace "${namespace}" changed.`,
         `Old value was "${oldValue}", new value is "${newValue}".`
       );
-      if (key === "mpg"){
+      if (key.toString() === "mpg"){
         saved_mpg = parseInt(newValue);
       }
       

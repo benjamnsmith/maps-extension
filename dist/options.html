@@ -5,6 +5,7 @@
 		<meta name="viewport" />
 		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 		<title>Google maps trip cost calculator</title>
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" rel="stylesheet" />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200&display=swap" rel="stylesheet">
@@ -12,7 +13,7 @@
 	</head>
 
     <body> 
-        <div class="wrapper">
+		<div class="wrapper">
 			<div class="title section">
 			  <h1 class="title_text">Options</h1>
 			</div>
@@ -29,41 +30,54 @@
 					<label for='region'></label>
 				  </div>
 				</form>
-				  <button class="new_car_button">Add vehicle</button>
-				  <div class="new_car_form">
-					<form>
-					  <h4>New vehicle info</h4>
-					  <div class="field">
-						<label for='make'></label>
-						<input type='text' class="inp" id='make' placeholder='Make'></input>
-					  </div>
-					  <div class="field">
-						<label for='model'></label>
-						<input type='text' class="inp" id='model' placeholder='Model'></input>
-					  </div>
-					  <div class="field">
-						<label for='mpg'></label>
-						<input type='number' class="inp" id='mpg' placeholder="MPG"></input>
-					  </div>
-					  <button class="vehicle_cancel">Cancel vehicle add</button>
-					  <button class="vehicle_submit" action="submit">Submit new vehicle</button>
-					</form>
-				  </div>
-				  <br>
-				<span class="warning">Heads up! Are you shure you want to clear your data?</span>
+				<button class="new_car_button">Add vehicle</button>
+				<div class="new_car_form">
+				  <form>
+					<h4>New vehicle info</h4>
+					<div class="field">
+					  <label for='make'></label>
+					  <input type='text' class="inp" id='make' placeholder='Make'></input>
+					</div>
+					<div class="field">
+					  <label for='model'></label>
+					  <input type='text' class="inp" id='model' placeholder='Model'></input>
+					</div>
+					<div class="field">
+					  <label for='mpg'></label>
+					  <input type='number' class="inp" id='mpg' placeholder="MPG"></input>
+					</div>
+					<button class="vehicle_cancel">Cancel vehicle add</button>
+					<button class="vehicle_submit" action="submit">Submit new vehicle</button>
+				  </form>
+				</div>
+				<br>
+				<span class="warning">Heads up! Are you sure you want to clear your data?</span>
 				<button class='close' type='close'>Close</button>
 				<button class="clear">Clear data</button>
-				
+		  
 			  </div>
 			  <div class="vehicles_display">
 				<h2 id="form_header">Your saved vehicles (<span id="num_vehicles">0</span> / 6)</h2>
 				<div class="vehicle_grid">
-				  <div class="vehicle_item v0" tabindex=0></div>
-				  <div class="vehicle_item v1" tabindex=0></div>
-				  <div class="vehicle_item v2" tabindex=0></div>
-				  <div class="vehicle_item v3" tabindex=0></div>
-				  <div class="vehicle_item v4" tabindex=0></div>
-				  <div class="vehicle_item v5" tabindex=0></div>
+				  <div class="vehicle_item v0" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+					<p></p>
+				  </div>
+				  <div class="vehicle_item v1" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+					<p></p>
+				  </div>
+				  <div class="vehicle_item v2" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+					<p></p>
+				  </div>
+				  <div class="vehicle_item v3" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+					<p></p>
+				  </div>
+				  <div class="vehicle_item v4" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+					<p></p>
+				  </div>
+				  <div class="vehicle_item v5" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+					<p></p>
+				  </div>
+		  
 				</div>
 			  </div>
 			</div>
