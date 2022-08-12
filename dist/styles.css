@@ -146,6 +146,11 @@ div.vehicle_item > span {
   margin: 15px 10px 5px 10px;
 }
 
+.vehicle_delete {
+  margin-left: 1rem;
+  cursor: pointer;
+}
+
 @media (min-width: 500px) {
   .content {
     flex-flow: row;
