@@ -5,6 +5,7 @@
   --blue: #aadaff;
   --banana: #fff2af;
   --orange: #f6cf65;
+  --text-color: #353839;
 }
 
 /* Background things */
@@ -41,13 +42,14 @@ body {
 .title_text {
   margin: 1rem;
   font-size: 40px;
-  color: #222326;
+  color: var(--text-color);
 }
 
 /* Bottom section */
 
-#entry_form {
+.user_name {
   margin-bottom: 1rem;
+  grid-row: 2;
 }
 
 .field {
@@ -69,6 +71,11 @@ select {
 
 .new_car_form {
   display: none;
+  grid-row: 4;
+}
+
+.new_car_button {
+  grid-row: 3;
 }
 
 .vehicle_update .cancel_update {
@@ -78,18 +85,34 @@ select {
 #form_header {
   font-size: 20px;
   margin-bottom: 0;
+  color: var(--text-color);
+  grid-row: 1;
+}
+
+h4 {
+  color: var(--text-color);
 }
 
 button {
   font-family: "Oswald";
   margin: 10px 0 0 9px;
+  color: var(--text-color);
+  width: 100px;
 }
 
 .info_display {
   /*   border: solid black; */
   flex-basis: 33%;
   margin: 1rem;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr;
 }
+
+.global_buttons {
+  grid-row: 5;
+}
+
 
 .content {
   display: flex;
@@ -121,11 +144,12 @@ button {
   grid-template-rows: 1fr 1fr;
   align-items: center;
   justify-items: center;
-  background-color: var(--orange);
+  background-color: var(--banana);
   border: solid black;
   border-radius: 2px;
   min-width: 50px;
   min-height: 50px;
+  color: var(--text-color);
 }
 
 div.vehicle_item > span {
@@ -149,6 +173,7 @@ div.vehicle_item > span {
 .vehicle_delete {
   margin-left: 1rem;
   cursor: pointer;
+  display: none;
 }
 
 @media (min-width: 500px) {

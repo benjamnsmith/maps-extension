@@ -1,92 +1,94 @@
-<!DOCTYPE html> 
-<html lang="en" min-width="500px"></html>
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" />
-		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-		<title>Google maps trip cost calculator</title>
-		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" rel="stylesheet" />
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200&display=swap" rel="stylesheet">
-		<link rel="stylesheet" href="./styles.css" />
-	</head>
+<!DOCTYPE html>
+<html lang="en" min-width="500px">
 
-    <body> 
-		<div class="wrapper">
-			<div class="title section">
-			  <h1 class="title_text">Options</h1>
-			</div>
-			<div class="content section">
-			  <div class="info_display">
+</html>
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+	<title>Google maps trip cost calculator</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" rel="stylesheet" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+	<div class="wrapper">
+		<div class="title section">
+			<h1 class="title_text">Options</h1>
+		</div>
+		<div class="content section">
+			
+			<div class="info_display">
 				<h2 id='form_header'>Add your info</h2>
 				<p class="welcome_message"></p>
-				<form id="entry_form">
-				  <div class="field">
-					<label for='name'></label>
-					<input type='text' id='name' placeholder='Name'></input>
-				  </div>
-				  <div class="field">
-					<label for='region'></label>
-				  </div>
-				</form>
+					<div class="user_name">
+						<label for='name'></label>
+						<input type='text' id='name' placeholder='Name'></input>
+					</div>
 				<button class="new_car_button">Add vehicle</button>
 				<div class="new_car_form">
-				  <form>
-					<h4>New vehicle info</h4>
-					<div class="field">
-					  <label for='make'></label>
-					  <input type='text' class="inp" id='make' placeholder='Make'></input>
-					</div>
-					<div class="field">
-					  <label for='model'></label>
-					  <input type='text' class="inp" id='model' placeholder='Model'></input>
-					</div>
-					<div class="field">
-					  <label for='mpg'></label>
-					  <input type='number' class="inp" id='mpg' placeholder="MPG"></input>
-					</div>
-					<button class="vehicle_cancel">Cancel vehicle add</button>
-					<button class="vehicle_submit" action="submit">Submit new vehicle</button>
-					
-					<button class="cancel_update">Close info</button>
-					<button class="vehicle_update">Update vehicle</button>
-					<div class="vehicle_delete fa-solid fa-trash fa-xl"></div>
-				  </form>
+					<form>
+						<h4>New vehicle info</h4>
+						<div class="field">
+							<label for='make'></label>
+							<input type='text' class="inp" id='make' placeholder='Make'></input>
+						</div>
+						<div class="field">
+							<label for='model'></label>
+							<input type='text' class="inp" id='model' placeholder='Model'></input>
+						</div>
+						<div class="field">
+							<label for='mpg'></label>
+							<input type='number' class="inp" id='mpg' placeholder="MPG"></input>
+						</div>
+						<div class="buttons">
+							<button class="vehicle_cancel">Cancel vehicle add</button>
+							<button class="vehicle_submit" action="submit">Submit new vehicle</button>
+
+							<button class="cancel_update">Close info</button>
+							<button class="vehicle_update">Update vehicle</button>
+							<div class="vehicle_delete fa-solid fa-trash fa-xl"></div>
+						</div>
+					</form>
 				</div>
 				<br>
-				<span class="warning">Heads up! Are you sure you want to clear your data?</span>
-				<button class='close' type='close'>Close</button>
-				<button class="clear">Clear data</button>
-				<button class="mem_dump">Dump</button>
-		  
-			  </div>
-			  <div class="vehicles_display">
+				<div class="global_buttons">
+					<span class="warning">Heads up! Are you sure you want to clear your data?</span>
+					<button class='close' type='close'>Close</button>
+					<button class="clear">Clear data</button>
+					<button class="mem_dump">Dump</button>
+				</div>
+			</div>
+			<div class="vehicles_display">
 				<h2 id="form_header">Your saved vehicles (<span id="num_vehicles">0</span> / 6)</h2>
 				<div class="vehicle_grid">
-				  <div class="vehicle_item v0" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-					<p></p>
-				  </div>
-				  <div class="vehicle_item v1" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-					<p></p>
-				  </div>
-				  <div class="vehicle_item v2" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-					<p></p>
-				  </div>
-				  <div class="vehicle_item v3" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-					<p></p>
-				  </div>
-				  <div class="vehicle_item v4" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-					<p></p>
-				  </div>
-				  <div class="vehicle_item v5" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-					<p></p>
-				  </div>
-		  
+					<div class="vehicle_item v0" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+						<p></p>
+					</div>
+					<div class="vehicle_item v1" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+						<p></p>
+					</div>
+					<div class="vehicle_item v2" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+						<p></p>
+					</div>
+					<div class="vehicle_item v3" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+						<p></p>
+					</div>
+					<div class="vehicle_item v4" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+						<p></p>
+					</div>
+					<div class="vehicle_item v5" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
+						<p></p>
+					</div>
+
 				</div>
-			  </div>
 			</div>
-		  </div>
-		  <script src="main.options.js"></script>
-    
-    </body>
+		</div>
+	</div>
+	<script src="main.options.js"></script>
+
+</body>
