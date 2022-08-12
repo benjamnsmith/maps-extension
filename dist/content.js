@@ -90,20 +90,8 @@ function handlePage() {
         else {
             handleData(data.selected);
         }
-        
-        
-    
-    
-    });
 
-
-       //saved_mpg = await readLocalStorage('mpg');
-    
-        // the divs containing the trip cost take so long to load sometimes
-        // my query on page load returns [] sometimes because they haven't been populated
-        // USUALLY waiting a second and re-trying works, but on suuuuper slow connections, this will break
-        // also - now that it has to wait for the MPG query that gives the page a little more time to load
-        
+    }); 
 }
 
 
@@ -120,19 +108,9 @@ window.addEventListener('load', (event) => {
     try{
         handlePage();
     } catch(error) {
+        // the divs containing the trip cost take so long to load sometimes
+        // my query on page load returns [] sometimes because they haven't been populated
         console.log("Error, trying again in 1s");
         setTimeout(handlePage, 1000);
     }
 });
-
-
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-      console.log(
-        `Storage key "${key}" in namespace "${namespace}" changed.`,
-        `Old value was "${oldValue}", new value is "${newValue}".`
-      );
-      
-      handlePage();
-    }
-  });
