@@ -4,6 +4,7 @@
 
 var saved_mpg = -10000;
 var outer_key = "";
+var gas_price = 4.0;
 
 
 // dom polling code from stack overflow
@@ -38,15 +39,14 @@ const getDistances = (timeout = 10000) => {
 
 
 function calculateCost(distance) {
-    console.log(`calculateCost() with distance as ${distance} and mpg as ${saved_mpg}`);
+    console.log(`calculateCost() with distance as ${distance}, mpg as ${saved_mpg}, and gas price as ${gas_price}`);
     if (saved_mpg < 0) {
         console.log("There was an error");
         throw "NegativeMPG"
     }
-    var currentGasPrice = 4.0;
     var percent = distance / saved_mpg;
   
-    return (percent * currentGasPrice).toFixed(2);
+    return (percent * gas_price).toFixed(2);
 }
 
 function clean(number_string){
@@ -88,7 +88,8 @@ function handlePage() {
     const dist_prom = getDistances();
 
     dist_prom.then( (dists) => {
-        console.log("getDistance got" + dists);
+        console.log("getDistance got");
+        console.log(dists);
         const future_data = chrome.storage.sync.get('selected');
 
         future_data.then((data) => {
