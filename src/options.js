@@ -26,6 +26,8 @@ function memPull(k) {
   }
 }
 
+
+
 // =============================================
 // GLOBALS =====================================
 // DOM items
@@ -34,6 +36,7 @@ const new_car_button = document.querySelector(".new_car_button");
 const new_car_form = document.querySelector(".new_car_form");
 const name_entry = document.querySelector("#name");
 const welcome_message = document.querySelector("#form_header");
+var fields = document.querySelectorAll(".inp");
 
 // Script items
 var cur_selected = {};
@@ -45,7 +48,7 @@ const info_strings = ["make", "model", "mpg"];
 // POPUP WINDOW FUNCTIONS
 function render() {
   // hide vehicles, show as needed
-  for (vehicle of vehicle_items) {
+  for (let vehicle of vehicle_items) {
     vehicle.style.display = "none";
   }
   currently_authd = memPull("login");
@@ -88,7 +91,6 @@ function render() {
 function handleSubmit(event) {
   event.preventDefault();
 
-  const fields = document.querySelectorAll(".inp");
 
   const new_vehicle = {
     make: fields[0].value,
@@ -116,13 +118,10 @@ function handleSubmit(event) {
 function handleUpdate(){
   var v_id = cur_selected.id;
 
-  const fields = document.querySelectorAll(".inp");
-  console.log(fields);
-
   var new_vehicle = {
     make: ( fields[0].value ? fields[0].value : fields[0].placeholder ),
     model: ( fields[1].value ? fields[1].value : fields[1].placeholder ),
-    mpg: ( fields[2].value ? fields[2].value : fields[2].placeholder ),
+    mpg: ( fields[2].value ? fields[2].value : fields[2].placeholder.split(" ")[0] ),
   };
 
   new_vehicle.id = v_id;
@@ -144,19 +143,15 @@ function handleUpdate(){
 
 
 function hideInfo(){
-  new_car_form.style.display = "none";
-  new_car_button.style.display = "block";
-  document.querySelector(".vehicle_update").style.display = "none";
 
-  document.querySelector("#make").placeholder = "Make";
-  document.querySelector("#model").placeholder = "Model";
-  document.querySelector("#mpg").placeholder = "MPG";
-  document.querySelector("#make").value = "";
-  document.querySelector("#model").value = "";
-  document.querySelector("#mpg").value = "";
+  const vals = ["Make", "Model", "MPG"];
+
+  for(var i = 0; i < fields.length; i++){
+    fields[i].placeholder = vals[i];
+    fields[i].value = ""
+  }
+
   document.querySelector("h4").innerText = "New vehicle info";
-
-
 }
 
 function showInfo(){
@@ -166,12 +161,14 @@ function showInfo(){
 
 
   document.querySelector("h4").innerText = "Vehicle Info";
-  new_car_form.style.display = "block";
+  new_car_form.style.display = "flex";
   new_car_button.style.display = "none";
   document.querySelector(".vehicle_submit").style.display = "none";
   document.querySelector(".vehicle_cancel").style.display = "none";
-  document.querySelector(".vehicle_update").style.display = "block";
-  const fields = document.querySelectorAll(".inp");
+  document.querySelector(".vehicle_update").style.display = "inline";
+  document.querySelector(".cancel_update").style.display = "inline";
+
+
   for (var i = 0; i < fields.length; i++ ) {
     fields[i].placeholder = cur_selected[info_strings[i]];
     if (info_strings[i] === "mpg"){
@@ -210,49 +207,51 @@ function vehicleClick(e) {
   }
 }
 
-// LISTEN FOR UPDATES FROM BACKGROUND.JS AND UPDATE ACCORDINGLY
-// going to end my life I can't believe I just used a closure in the wild
-function generateToggler() {
-  var t = 0;
-  function toggle() {
-    switch (t) {
-      case 0:
-        new_car_button.style.display = "none";
-        new_car_form.style.display = "block";
-        t = 1;
-        break;
-      case 1:
-        document.querySelector("#make").value = "";
-        document.querySelector("#model").value = "";
-        document.querySelector("#mpg").value = "";
-        new_car_button.style.display = "block";
-        new_car_form.style.display = "none";
-        t = 0;
-        break;
-    }
-  }
-  return toggle;
-}
+function showHide(){
+  // show
+  if (new_car_form.style.display === "none"){
+    new_car_form.style.display = "flex";
+    new_car_button.style.display = "none";
 
-const tog_func = generateToggler();
+    
+
+    document.querySelector("#make").value = "";
+    document.querySelector("#model").value = "";
+    document.querySelector("#mpg").value = "";
+
+    document.querySelector(".cancel_update").style.display = "none";
+    document.querySelector(".vehicle_update").style.display = "none";
+    document.querySelector(".vehicle_submit").style.display = "inline";
+    document.querySelector(".vehicle_cancel").style.display = "inline";
+  } else { // hide
+    new_car_button.style.display = "inline";
+    new_car_form.style.display = "none";
+
+    document.querySelector(".cancel_update").style.display = "inline";
+    document.querySelector(".vehicle_update").style.display = "inline";
+  }
+
+}
 
 // RUN UPON EXTENSION INIT
 render();
 
 new_car_button.addEventListener("click", (e) => {
   e.preventDefault();
-  tog_func();
+  showHide();
 });
 
 document.querySelector(".vehicle_submit").addEventListener("click", (e) => {
   e.preventDefault();
   handleSubmit(e);
-  tog_func();
+  showHide();
 });
 
 document.querySelector(".vehicle_cancel").addEventListener("click", (e) => {
   e.preventDefault();
-  tog_func();
+
+  hideInfo();
+  showHide()
 });
 
 document.querySelector(".vehicle_update").addEventListener("click", (e) => {
@@ -262,12 +261,21 @@ document.querySelector(".vehicle_update").addEventListener("click", (e) => {
 
 });
 
+document.querySelector(".cancel_update").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  hideInfo();
+  showHide();
+});
+
+document.querySelector(".vehicle_delete").addEventListener("click", (e) => {
+  window.alert("delete");
+}); 
 
 
 function allStorage() {
 
-  var values = [],
-      keys = Object.keys(localStorage),
+  var keys = Object.keys(localStorage),
       i = keys.length;
 
   while ( i-- ) {
@@ -337,6 +345,7 @@ document.querySelector(".clear").addEventListener("click", (e) => {
       chrome.storage.sync.clear();
       name_entry.value = "";
       new_car_form.style.display = "none";
+      new_car_button.style.display = "block";
 
       render();
       break;
@@ -359,7 +368,7 @@ document.querySelector(".close").addEventListener("click", (e) => {
   }
 });
 
-for (vehicle of vehicle_items) {
+for (let vehicle of vehicle_items) {
   vehicle.addEventListener("click", (e) => vehicleClick(e));
 }
 
