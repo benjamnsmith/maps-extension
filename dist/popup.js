@@ -26,7 +26,6 @@ function displayName(n){
 function displayInfo(user_data){
   welc_message.innerText = "Hey there, " + user_g + "!";
 
-  year.innerText = user_data.year;
   make.innerText = user_data.make;
   model.innerText = user_data.model;
   mpg.innerText = user_data.mpg;
