@@ -3,30 +3,39 @@
 // as specified in manifest.json ()
 
 var saved_mpg = -10000;
-var dists = [];
 var outer_key = "";
 
-function getDistance(){
-    // retrieve all DOM elements that include the phrase "miles" in their text content
-    let matches = [];
-    for(const div of document.querySelectorAll('div')){
-        if (div.textContent.includes("miles")) {
-            matches.push(div);
+
+// dom polling code from stack overflow
+const getDistances = (timeout = 10000) => {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now();
+      const tryQuery = () => {
+        let matches = [];
+        for(const div of document.querySelectorAll('div')){
+            if (div.textContent.includes("miles")) {
+                matches.push(div);
+            }
         }
-    }
 
-    const pattern = /\d+ miles$/;
-
-    let results = []
-
-    // of the retrieved divs, only get the ones that match the pattern above (the ones we want to change)
-    for (const match of matches) {
-        if (pattern.test(match.textContent)) {
-            results.push(match);
+        const pattern = /\d+ miles$/;
+    
+        let results = []
+    
+        // of the retrieved divs, only get the ones that match the pattern above (the ones we want to change)
+        for (const match of matches) {
+            if (pattern.test(match.textContent)) {
+                results.push(match);
+            }
         }
-    }
-    return results;
-}
+        if (matches.length) resolve(results); // Found the element
+        else if (Date.now() - startTime > timeout) resolve(null); // Give up eventually
+        else setTimeout(tryQuery, 10); // check again every 10ms
+      }
+      tryQuery(); // Initial check
+    });
+  };
+
 
 function calculateCost(distance) {
     console.log(`calculateCost() with distance as ${distance} and mpg as ${saved_mpg}`);
@@ -52,20 +61,17 @@ function clean(number_string){
 }
 
 
-function handleData(vehicle_info){
+function handleData(vehicle_info, dists){
     saved_mpg = vehicle_info.mpg;
-    if (dists.length === 0) {
-        throw 'NoElementsFound';
-    }
+
     var costs = [];
-    var text = []
+    var text = [];
     for (const dist of dists) {
         text.push(dist.textContent);
         var d_int = dist.textContent.split(" ")[0];
         var cleaned = clean(d_int);
         costs.push(calculateCost(cleaned));
     }
-    console.log(costs);
     for (idx in costs) {
         console.log(`${text[idx]} will cost ${costs[idx]}`);
         dists[idx].textContent = text[idx] + " ($" + costs[idx] + ")";
@@ -74,25 +80,36 @@ function handleData(vehicle_info){
 
 function handleReject(err){
     console.log(err);
+    throw err;
 }
 
 
 function handlePage() {
+    const dist_prom = getDistances();
 
-    dists = getDistance();
-    const future_data = chrome.storage.sync.get('selected');
+    dist_prom.then( (dists) => {
+        console.log("getDistance got" + dists);
+        const future_data = chrome.storage.sync.get('selected');
 
-     future_data.then((data) => {
+        future_data.then((data) => {
 
-        if (data.selected === undefined){
-            handleReject(data);
-        }
-        else {
-            handleData(data.selected);
-        }
+            if (data.selected === undefined){
+                handleReject(data);
+            }
+            else {
+                handleData(data.selected, dists);
+            }
+    
+        }, handleReject); 
+    })
 
-    }); 
+    
+
+    
+    
+
 }
+
 
 
 /* 
@@ -105,12 +122,5 @@ Flow of execution:
 */
 
 window.addEventListener('load', (event) => {
-    try{
-        handlePage();
-    } catch(error) {
-        // the divs containing the trip cost take so long to load sometimes
-        // my query on page load returns [] sometimes because they haven't been populated
-        console.log("Error, trying again in 1s");
-        setTimeout(handlePage, 1000);
-    }
+    handlePage();
 });
