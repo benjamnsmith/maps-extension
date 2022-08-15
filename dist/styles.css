@@ -9,6 +9,10 @@
 }
 
 /* Background things */
+body {
+  background-color: var(--platinum);
+}
+
 .wrapper {
   display: grid;
   flex-flow: column;
@@ -16,10 +20,6 @@
   border: 0;
   width: 100%;
   height: 100%;
-}
-
-body {
-  background-color: var(--platinum);
 }
 
 .section {
@@ -30,7 +30,7 @@ body {
   border-width: medium;
 }
 
-/* Top section*/
+/* ENTIRE UPPER SECTION */
 .title {
   font-family: "Oswald";
   background-color: var(--green);
@@ -45,75 +45,7 @@ body {
   color: var(--text-color);
 }
 
-/* Bottom section */
-
-.user_name {
-  margin-bottom: 1rem;
-  grid-row: 2;
-}
-
-.field {
-  margin: 5px 0px 0px 0px;
-}
-
-input,
-select {
-  border-style: double;
-  border-radius: 5px;
-  margin: 0 0 0 10px;
-  width: 250px;
-  background-color: var(--lightsilver);
-}
-
-select {
-  width: 259px;
-}
-
-.new_car_form {
-  display: none;
-  grid-row: 4;
-}
-
-.new_car_button {
-  grid-row: 3;
-}
-
-.vehicle_update .cancel_update {
-  display: none;
-}
-
-#form_header {
-  font-size: 20px;
-  margin-bottom: 0;
-  color: var(--text-color);
-  grid-row: 1;
-}
-
-h4 {
-  color: var(--text-color);
-}
-
-button {
-  font-family: "Oswald";
-  margin: 10px 0 0 9px;
-  color: var(--text-color);
-  width: 100px;
-}
-
-.info_display {
-  /*   border: solid black; */
-  flex-basis: 33%;
-  margin: 1rem;
-  display: grid;
-  grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
-  grid-template-columns: 1fr;
-}
-
-.global_buttons {
-  grid-row: 5;
-}
-
-
+/* ENTIRE LOWER SECTION */
 .content {
   display: flex;
   flex-flow: column;
@@ -122,8 +54,97 @@ button {
   height: 400px;
 }
 
+.info_display {
+  flex-basis: 33%;
+  display: grid;
+  gap: 2%;
+  grid-template-rows: 1fr 0.5fr 2fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-left: 1rem;
+}
+
+#form_header { /* Add your info OR welcome back, name! */
+  font-size: 20px;
+  color: var(--text-color);
+  grid-row: 1;
+  grid-column-start: 1;
+  grid-column-end: 4;
+}
+
+
+.user_name { /* name input field */
+  grid-row: 2;
+  grid-column-start: 1;
+  grid-column-end: 3;
+}
+
+.new_car_button {
+  grid-row: 2;
+  grid-column: 3;
+}
+
+.new_car_form {
+  display: none;
+  /* grid-row: 4; */
+  grid-row-start: 2;
+  grid-row-end: 4;
+}
+
+h4 {
+  color: var(--text-color);
+}
+
+input {
+  width: 100%;
+  border-style: double;
+  border-radius: 5px;
+  background-color: var(--lightsilver);
+}
+
+.vehicle_update .cancel_update {
+  display: none;
+}
+
+button {
+  font-family: "Oswald";
+  color: var(--text-color);
+}
+
+/* BOTTOM BUTTONS */
+.global_buttons {
+  grid-row: 4;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+.close {
+  grid-column: 1;
+}
+
+.clear {
+  grid-column: 2;
+}
+
+.mem_dump{
+  grid-column: 3;
+}
+
+.warning {
+  color: red;
+  font-family: "Courier New", Courier, monospace;
+  display: none;
+  margin: 15px 10px 5px 10px;
+}
+
+.vehicle_delete { /* trash button */
+  margin-left: 1rem;
+  cursor: pointer;
+  display: none;
+}
+
+/* VEHICLE OPTIONS */
 .vehicles_display {
-  /*   border: solid black; */
   flex-basis: 66%;
   display: flex;
   flex-flow: column;
@@ -152,29 +173,15 @@ button {
   color: var(--text-color);
 }
 
+/* car icons */
 div.vehicle_item > span {
   font-size: 2.5rem;
-  
 }
 
 .vehicle_item:hover {
   cursor: pointer;
 }
 
-
-
-.warning {
-  color: red;
-  font-family: "Courier New", Courier, monospace;
-  display: none;
-  margin: 15px 10px 5px 10px;
-}
-
-.vehicle_delete {
-  margin-left: 1rem;
-  cursor: pointer;
-  display: none;
-}
 
 @media (min-width: 500px) {
   .content {

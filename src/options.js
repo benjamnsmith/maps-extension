@@ -107,7 +107,7 @@ function handleSubmit(event) {
     mpg: fields[2].value,
   };
 
-  
+
 
   var n = parseInt(memPull("num"));
   new_vehicle.id = n;
@@ -142,13 +142,7 @@ function handleUpdate(){
   memPush("sel", JSON.stringify(new_vehicle));
   chrome.storage.sync.set({selected: new_vehicle});
 
-  // for (var i = 0; i < fields.length; i++){
-  //   fields[i].value = "";
-  //   fields[i].placeholder = new_vehicle[info_strings[i]];
-  //   if (info_strings[i] === "mpg"){
-  //     fields[i].placeholder += " MPG"
-  //   }
-  // }
+  
   cur_selected = new_vehicle;
   hideInfo();
   showInfo();
@@ -188,6 +182,7 @@ function showInfo(){
       fields[i].placeholder += " MPG";
     }
   }
+
 }
 
 
@@ -221,7 +216,12 @@ function vehicleClick(e) {
 }
 
 function showHide(){
+  if (new_car_form.style.display === ""){
+    new_car_form.style.display = "none";
+  }
+
   if (new_car_form.style.display !== "none"){
+    console.log("Here")
     new_car_button.style.display = "inline";
     new_car_form.style.display = "none";
 
