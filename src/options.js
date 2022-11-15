@@ -3,6 +3,8 @@
 // all data should be passed to background.js upon save
 // utilize chrome storage so all scripts can access data
 
+import { Vehicle } from "./vehicles"
+
 // MEMORY SETTING/GETTING - move to new file
 function memPush(k, v) {
   console.log(`Adding ${k} to memory as ${v}`);
@@ -100,23 +102,16 @@ function clearForm(){
 function handleSubmit(event) {
   event.preventDefault();
 
-
-  const new_vehicle = {
-    make: fields[0].value,
-    model: fields[1].value,
-    mpg: fields[2].value,
-  };
-
-
-
   var n = parseInt(memPull("num"));
-  new_vehicle.id = n;
+
+  const new_vehicle = new Vehicle(fields[0].value, fields[1].value, fields[2].value, n);
+
   var v_name = "v" + n;
-  memPush(v_name, JSON.stringify(new_vehicle));
+  memPush(v_name, new_vehicle.string());
 
   console.log("Selecting newest vehicle");
   cur_selected = new_vehicle;
-  memPush("sel", JSON.stringify(new_vehicle));
+  memPush("sel", new_vehicle.string());
   chrome.storage.sync.set({ selected: new_vehicle });
   n++;
   memPush("num", n);
@@ -131,15 +126,15 @@ function handleSubmit(event) {
 function handleUpdate(){
   var v_id = cur_selected.id;
 
-  var new_vehicle = {
-    make: ( fields[0].value ? fields[0].value : fields[0].placeholder ),
-    model: ( fields[1].value ? fields[1].value : fields[1].placeholder ),
-    mpg: ( fields[2].value ? fields[2].value : fields[2].placeholder.split(" ")[0] ),
-  };
+  var new_vehicle = new Vehicle(
+    fields[0].value ? fields[0].value : fields[0].placeholder,
+    fields[1].value ? fields[1].value : fields[1].placeholder,
+    fields[2].value ? fields[2].value : fields[2].placeholder.split(" ")[0],
+    v_id
+  );
 
-  new_vehicle.id = v_id;
-  memPush("v" + v_id, JSON.stringify(new_vehicle));
-  memPush("sel", JSON.stringify(new_vehicle));
+  memPush("v" + v_id, new_vehicle.string());
+  memPush("sel", new_vehicle.string());
   chrome.storage.sync.set({selected: new_vehicle});
 
   
@@ -167,7 +162,7 @@ function showInfo(){
 
 
   document.querySelector("h4").innerText = "Vehicle Info";
-  new_car_form.style.display = "flex";
+  new_car_form.style.display = "grid";
   new_car_button.style.display = "none";
   document.querySelector(".vehicle_submit").style.display = "none";
   document.querySelector(".vehicle_cancel").style.display = "none";
