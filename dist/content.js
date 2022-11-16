@@ -3,11 +3,10 @@
 // as specified in manifest.json ()
 
 var saved_mpg = -10000;
-var outer_key = "";
 var gas_price = 4.0;
 
 
-// dom polling code from stack overflow
+// dom polling code based on code from so
 const getDistances = (timeout = 10000) => {
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
