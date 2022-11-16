@@ -45,7 +45,7 @@ body {
   color: var(--text-color);
 }
 
-/* ENTIRE LOWER SECTION */
+/* ENTIRE MIDDLE SECTION */
 .content {
   display: flex;
   flex-flow: column;
@@ -192,6 +192,28 @@ div.vehicle_item > span {
   cursor: pointer;
 }
 
+/* ENTIRE LOWER SECTION - ABOUT */
+.about {
+  font-family: "Oswald";
+  font-size: 1rem;
+  background-color: var(--lightsilver);
+}
+
+.about_header {
+  margin: 1rem;
+}
+
+.footer {
+  margin: 1rem;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  font-weight: bold;
+}
 
 @media (min-width: 500px) {
   .content {
