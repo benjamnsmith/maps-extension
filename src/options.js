@@ -39,11 +39,16 @@ const new_car_form = document.querySelector(".new_car_form");
 const name_entry = document.querySelector("#name");
 const welcome_message = document.querySelector("#form_header");
 var fields = document.querySelectorAll(".inp");
+const update_button = document.querySelector(".vehicle_update");
+const cancel_update_button = document.querySelector(".cancel_update");
+const submit_vehicle = document.querySelector(".vehicle_submit");
+const vehicle_cancel = document.querySelector(".vehicle_cancel");
+
 
 // Script items
 var cur_selected = {};
 const dev = true;
-var currently_authd = false;
+//var currently_authd = false;
 const info_strings = ["make", "model", "mpg"];
 const display_strings = ["Make", "Model", "MPG"];
 const text_color = "#353839";
@@ -55,9 +60,9 @@ function render() {
   for (let vehicle of vehicle_items) {
     vehicle.style.display = "none";
   }
-  currently_authd = memPull("login");
+  var currently_authd = memPull("login") ? memPull("login") : false ;
 
-  if (currently_authd === "true") {
+  if (currently_authd) {
     // populate user data
     var name = memPull("name");
     var n = parseInt(memPull("num"));
@@ -164,10 +169,10 @@ function showInfo(){
   document.querySelector("h4").innerText = "Vehicle Info";
   new_car_form.style.display = "grid";
   new_car_button.style.display = "none";
-  document.querySelector(".vehicle_submit").style.display = "none";
-  document.querySelector(".vehicle_cancel").style.display = "none";
-  document.querySelector(".vehicle_update").style.display = "inline";
-  document.querySelector(".cancel_update").style.display = "inline";
+  submit_vehicle.style.display = "none";
+  vehicle_cancel.style.display = "none";
+  update_button.style.display = "inline";
+  cancel_update_button.style.display = "inline";
   document.querySelector(".vehicle_delete").style.display = "inline";
 
 
@@ -220,8 +225,8 @@ function showHide(){
     new_car_button.style.display = "inline";
     new_car_form.style.display = "none";
 
-    document.querySelector(".cancel_update").style.display = "inline";
-    document.querySelector(".vehicle_update").style.display = "inline";
+    cancel_update_button.style.display = "inline";
+    update_button.style.display = "inline";
   } else {
     new_car_form.style.display = "flex";
     new_car_button.style.display = "none";
@@ -230,53 +235,13 @@ function showHide(){
     document.querySelector("#model").value = "";
     document.querySelector("#mpg").value = "";
 
-    document.querySelector(".cancel_update").style.display = "none";
-    document.querySelector(".vehicle_update").style.display = "none";
-    document.querySelector(".vehicle_submit").style.display = "inline";
-    document.querySelector(".vehicle_cancel").style.display = "inline";
+    cancel_update_button.style.display = "none";
+    update_button.style.display = "none";
+    submit_vehicle.style.display = "inline";
+    vehicle_cancel.style.display = "inline";
   }
  
 }
-
-// RUN UPON EXTENSION INIT
-render();
-
-new_car_button.addEventListener("click", (e) => {
-  e.preventDefault();
-  showHide();
-});
-
-document.querySelector(".vehicle_submit").addEventListener("click", (e) => {
-  e.preventDefault();
-  handleSubmit(e);
-  showHide();
-});
-
-document.querySelector(".vehicle_cancel").addEventListener("click", (e) => {
-  e.preventDefault();
-
-  hideInfo();
-  showHide()
-});
-
-document.querySelector(".vehicle_update").addEventListener("click", (e) => {
-  e.preventDefault();
-
-  handleUpdate();
-
-});
-
-document.querySelector(".cancel_update").addEventListener("click", (e) => {
-  e.preventDefault();
-
-  hideInfo();
-  showHide();
-});
-
-document.querySelector(".vehicle_delete").addEventListener("click", (e) => {
-  window.alert("delete");
-}); 
-
 
 function allStorage() {
 
@@ -288,6 +253,50 @@ function allStorage() {
   }
 
 }
+
+
+// RUN UPON EXTENSION INIT
+render();
+
+
+// EVENT LISTENERS
+new_car_button.addEventListener("click", (e) => {
+  e.preventDefault();
+  showHide();
+});
+
+submit_vehicle.addEventListener("click", (e) => {
+  e.preventDefault();
+  handleSubmit(e);
+  showHide();
+});
+
+vehicle_cancel.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  hideInfo();
+  showHide()
+});
+
+update_button.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  handleUpdate();
+
+});
+
+cancel_update_button.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  hideInfo();
+  showHide();
+});
+
+document.querySelector(".vehicle_delete").addEventListener("click", (e) => {
+  window.alert("delete");
+}); 
+
+
 
 document.querySelector(".mem_dump").addEventListener("click", (e) => {
   e.preventDefault();
