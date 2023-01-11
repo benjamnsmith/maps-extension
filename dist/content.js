@@ -3,7 +3,7 @@
 // as specified in manifest.json ()
 
 var saved_mpg = -10000;
-var gas_price = 4.0;
+var gas_price = -10;
 
 
 // dom polling code based on code from so
@@ -84,30 +84,31 @@ function handleReject(err){
 
 
 function handlePage() {
-    const dist_prom = getDistances();
+    const gas_price_prom = chrome.storage.sync.get('price');
 
-    dist_prom.then( (dists) => {
-        console.log("getDistance got");
-        console.log(dists);
-        const future_data = chrome.storage.sync.get('selected');
+    gas_price_prom.then( (data) => {
+        gas_price = data.price;
 
-        future_data.then((data) => {
+        const dist_prom = getDistances();
 
-            if (data.selected === undefined){
-                handleReject(data);
-            }
-            else {
-                handleData(data.selected, dists);
-            }
-    
-        }, handleReject); 
+        dist_prom.then( (dists) => {
+            console.log("getDistance got");
+            console.log(dists);
+            const future_data = chrome.storage.sync.get('selected');
+
+            future_data.then((data) => {
+
+                if (data.selected === undefined){
+                    handleReject(data);
+                }
+                else {
+                    handleData(data.selected, dists);
+                }
+        
+            }, handleReject); 
+        })
     })
-
     
-
-    
-    
-
 }
 
 
