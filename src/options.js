@@ -3,32 +3,8 @@
 // all data should be passed to background.js upon save
 // utilize chrome storage so all scripts can access data
 
-import { Vehicle } from "./vehicles"
-
-// MEMORY SETTING/GETTING - move to new file
-function memPush(k, v) {
-  console.log(`Adding ${k} to memory as ${v}`);
-  if (dev) {
-    localStorage.setItem(k, v);
-  } else {
-    chrome.storage.sync.set({ k: v });
-    console.log(`CHROME STORAGE SET ${k} ${v}`);
-  }
-}
-
-function memPull(k) {
-  if (dev) {
-    return localStorage.getItem(k);
-  } else {
-    console.log(`CHROME STORAGE QUERYING ${k}`);
-    chrome.storage.sync.get(k, function (res) {
-      console.log(`CHROME STORAGE GOT:`);
-      console.log(res);
-      return res.k;
-    });
-  }
-}
-
+import { Vehicle } from "./vehicles";
+import { Memory } from "./memory.js";
 
 
 // =============================================
@@ -49,10 +25,10 @@ const gas_price = document.querySelector("#gas_price");
 
 // Script items
 var cur_selected = {};
-const dev = true;
 const info_strings = ["make", "model", "mpg"];
 const display_strings = ["Make", "Model", "MPG"];
 const text_color = "#353839";
+var controller = new Memory(false);
 // =============================================
 
 // POPUP WINDOW FUNCTIONS
@@ -62,17 +38,19 @@ function render() {
     vehicle.style.display = "none";
   }
 
-  var currently_authd = memPull("login") ? memPull("login") : false ;
+  var login = controller.pull("login");
+
+  var currently_authd = login ? login : false ;
 
   if (currently_authd) {
     // populate user data
-    var name = memPull("name");
-    var n = parseInt(memPull("num"));
-    var price = memPull("price");
+    var name = controller.pull("name");
+    var n = parseInt(controller.pull("num"));
+    var price = controller.pull("price");
 
     welcome_message.innerText = "Welcome back, " + name + "!";
     name_entry.placeholder = name;
-    gas_price.placeholder = price ? "$" + price + " per gallon": "$0 per gallon";
+    gas_price.placeholder = price ? "$" + price + " per gallon": "Price per gallon";
     new_car_button.disabled = false;
 
     console.log(`There are ${n} car/s in memory`);
@@ -82,9 +60,10 @@ function render() {
     for (var i = 0; i < n; i++) {
       vehicle_items[i].style.display = "grid";
       tmp = "v" + i;
-      const cur_v = JSON.parse(memPull(tmp));
+      console.log(`pulling ${tmp}`);
+      const cur_v = JSON.parse(controller.pull(tmp));
       vehicle_items[i].childNodes[2].innerText = cur_v.make + " " + cur_v.model + " (" + cur_v.mpg + " MPG)";
-      if (JSON.parse(memPull("sel")).id === JSON.parse(memPull(tmp)).id) {
+      if (JSON.parse(controller.pull("sel")).id === JSON.parse(controller.pull(tmp)).id) {
         vehicle_items[i].style.color = "red";
       } else {
         vehicle_items[i].style.color = text_color;
@@ -98,7 +77,7 @@ function render() {
     name_entry.placeholder = "Name";
     new_car_button.disabled = true;
 
-    memPush("num", 0);
+    controller.push("num", 0);
   }
 }
 
@@ -112,25 +91,32 @@ function clearForm(){
 function handleSubmit(event) {
   event.preventDefault();
 
-  var n = parseInt(memPull("num"));
+  var n = parseInt(controller.pull("num"));
 
   const new_vehicle = new Vehicle(fields[0].value, fields[1].value, fields[2].value, n);
 
   var v_name = "v" + n;
-  memPush(v_name, new_vehicle.string());
+  controller.push(v_name, new_vehicle.string());
 
   console.log("Selecting newest vehicle");
   cur_selected = new_vehicle;
-  memPush("sel", new_vehicle.string());
-  chrome.storage.sync.set({ selected: new_vehicle });
+  controller.push("sel", new_vehicle.string());
   n++;
-  memPush("num", n);
+  controller.push("num", n);
 
   clearForm();
 
   render();
 }
 
+
+function deleteVehicle(event) {
+  event.preventDefault();
+
+  window.alert("delete");
+
+
+}
 
 
 function handleUpdate(){
@@ -143,9 +129,9 @@ function handleUpdate(){
     v_id
   );
 
-  memPush("v" + v_id, new_vehicle.string());
-  memPush("sel", new_vehicle.string());
-  chrome.storage.sync.set({selected: new_vehicle});
+  controller.push("v" + v_id, new_vehicle.string());
+  controller.push("sel", new_vehicle.string());
+  controller.push(selected, new_vehicle);
 
   
   cur_selected = new_vehicle;
@@ -201,15 +187,15 @@ function vehicleClick(e) {
     var v_id = e.target.className.split(" ")[1];
   }
 
-  const selected = JSON.parse(memPull(v_id));
+  const selected = JSON.parse(controller.pull(v_id));
 
   if (cur_selected.id === selected.id) {
     console.log("This vehicle is already selected");
   } else {
-    memPush("sel", JSON.stringify(selected));
+    controller.push("sel", JSON.stringify(selected));
 
     console.log(`The new MPG used will be ${selected.mpg}`);
-    chrome.storage.sync.set({ selected: selected });
+    controller.push(selected, selected);
     console.log("pushed selected?");
   }
 
@@ -226,7 +212,6 @@ function showHide(){
   }
 
   if (new_car_form.style.display !== "none"){
-    console.log("Here")
     new_car_button.style.display = "inline";
     new_car_form.style.display = "none";
 
@@ -259,29 +244,63 @@ function allStorage() {
 
 }
 
-
 // RUN UPON EXTENSION INIT
 render();
 
 
 // EVENT LISTENERS
+// name entry submit handlers - enter key or blur
+name_entry.addEventListener("keypress", (e) => {
+  if (e.keyCode === 13) {
+    if (name_entry.value !== "") {
+      controller.push("name", name_entry.value);
+      controller.push("login", "true");
+      render();
+    }
+  }
+});
+
+name_entry.addEventListener("blur", (e) => {
+  e.preventDefault();
+  if (name_entry.value !== "") {
+    controller.push("name", name_entry.value);
+    controller.push("login", "true");
+    render();
+  }
+});
+
+// gas price submit handler - blur only, TODO : keypress
+gas_price.addEventListener("blur", (e) => {
+  e.preventDefault();
+  if (gas_price.value !== "") {
+    controller.push("price", gas_price.value);
+    controller.push("price", `${gas_price.value}`);
+    gas_price.value = "";
+    render();
+  }
+});
+
+// add vehicle button
 new_car_button.addEventListener("click", (e) => {
   e.preventDefault();
   showHide();
 });
 
+// submit new vehicle button
 submit_vehicle.addEventListener("click", (e) => {
   e.preventDefault();
   handleSubmit(e);
   showHide();
 });
 
+// cancel vehicle add button
 vehicle_cancel.addEventListener("click", (e) => {
   e.preventDefault();
 
   hideInfo();
   showHide()
 });
+
 
 update_button.addEventListener("click", (e) => {
   e.preventDefault();
@@ -298,7 +317,7 @@ cancel_update_button.addEventListener("click", (e) => {
 });
 
 document.querySelector(".vehicle_delete").addEventListener("click", (e) => {
-  window.alert("delete");
+  deleteVehicle(e);
 }); 
 
 
@@ -318,36 +337,8 @@ document.querySelector(".mem_dump").addEventListener("click", (e) => {
 
 });
 
-name_entry.addEventListener("blur", (e) => {
-  e.preventDefault();
-  if (name_entry.value !== "") {
-    memPush("name", name_entry.value);
-    chrome.storage.sync.set({ user: `${name_entry.value}` });
-    memPush("login", "true");
-    render();
-  }
-});
 
-gas_price.addEventListener("blur", (e) => {
-  e.preventDefault();
-  if (gas_price.value !== "") {
-    memPush("price", gas_price.value);
-    chrome.storage.sync.set({ price: `${gas_price.value}` });
-    gas_price.value = "";
-    render();
-  }
-});
 
-name_entry.addEventListener("keypress", (e) => {
-  if (e.keyCode === 13) {
-    if (name_entry.value !== "") {
-      memPush("name", name_entry.value);
-      chrome.storage.sync.set({ user: `${name_entry.value}` });
-      memPush("login", "true");
-      render();
-    }
-  }
-});
 
 var double_check = 0;
 
@@ -373,6 +364,7 @@ document.querySelector(".clear").addEventListener("click", (e) => {
       localStorage.clear();
       chrome.storage.sync.clear();
       name_entry.value = "";
+      gas_price.placeholder = "Price per gallon"
       new_car_form.style.display = "none";
       new_car_button.style.display = "block";
 
