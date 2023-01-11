@@ -22,8 +22,9 @@ function memPull(k) {
   } else {
     console.log(`CHROME STORAGE QUERYING ${k}`);
     chrome.storage.sync.get(k, function (res) {
-      console.log(`CHROME STORAGE GOT: ${res}`);
-      return res;
+      console.log(`CHROME STORAGE GOT:`);
+      console.log(res);
+      return res.k;
     });
   }
 }
@@ -43,12 +44,12 @@ const update_button = document.querySelector(".vehicle_update");
 const cancel_update_button = document.querySelector(".cancel_update");
 const submit_vehicle = document.querySelector(".vehicle_submit");
 const vehicle_cancel = document.querySelector(".vehicle_cancel");
+const gas_price = document.querySelector("#gas_price");
 
 
 // Script items
 var cur_selected = {};
 const dev = true;
-//var currently_authd = false;
 const info_strings = ["make", "model", "mpg"];
 const display_strings = ["Make", "Model", "MPG"];
 const text_color = "#353839";
@@ -60,21 +61,23 @@ function render() {
   for (let vehicle of vehicle_items) {
     vehicle.style.display = "none";
   }
+
   var currently_authd = memPull("login") ? memPull("login") : false ;
 
   if (currently_authd) {
     // populate user data
     var name = memPull("name");
     var n = parseInt(memPull("num"));
-    if (n !== 0) {
-      var sel_mpg = JSON.parse(memPull("sel")).mpg;
-    }
+    var price = memPull("price");
+
     welcome_message.innerText = "Welcome back, " + name + "!";
     name_entry.placeholder = name;
+    gas_price.placeholder = price ? "$" + price + " per gallon": "$0 per gallon";
     new_car_button.disabled = false;
 
     console.log(`There are ${n} car/s in memory`);
     document.querySelector("#num_vehicles").innerText = n;
+
     var tmp;
     for (var i = 0; i < n; i++) {
       vehicle_items[i].style.display = "grid";
@@ -87,7 +90,9 @@ function render() {
         vehicle_items[i].style.color = text_color;
       }
     }
+
   } else {
+    // show new user view
     welcome_message.innerText = "Add your info";
     document.querySelector("#num_vehicles").innerText = 0;
     name_entry.placeholder = "Name";
@@ -319,6 +324,16 @@ name_entry.addEventListener("blur", (e) => {
     memPush("name", name_entry.value);
     chrome.storage.sync.set({ user: `${name_entry.value}` });
     memPush("login", "true");
+    render();
+  }
+});
+
+gas_price.addEventListener("blur", (e) => {
+  e.preventDefault();
+  if (gas_price.value !== "") {
+    memPush("price", gas_price.value);
+    chrome.storage.sync.set({ price: `${gas_price.value}` });
+    gas_price.value = "";
     render();
   }
 });
