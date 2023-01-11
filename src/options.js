@@ -163,8 +163,6 @@ function hideInfo(){
 function showInfo(){
   console.log("selected:")
   console.log(cur_selected);
-  
-
 
   document.querySelector("h4").innerText = "Vehicle Info";
   new_car_form.style.display = "grid";
@@ -177,6 +175,7 @@ function showInfo(){
 
 
   for (var i = 0; i < fields.length; i++ ) {
+    fields[i].value = "";
     fields[i].placeholder = cur_selected[info_strings[i]];
     if (info_strings[i] === "mpg"){
       fields[i].placeholder += " MPG";
@@ -190,6 +189,7 @@ function showInfo(){
 
 function vehicleClick(e) {
   console.log(e.target.className);
+
   if (!e.target.className.includes("vehicle_item")) {
     var v_id = e.target.parentNode.className.split(" ")[1];
   } else {
@@ -385,4 +385,3 @@ document.querySelector(".close").addEventListener("click", (e) => {
 for (let vehicle of vehicle_items) {
   vehicle.addEventListener("click", (e) => vehicleClick(e));
 }
-
