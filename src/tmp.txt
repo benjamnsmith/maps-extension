@@ -1,0 +1,28 @@
+CHROME MEMORY CALLS     
+
+
+SETTERS
+=======
+chrome.storage.sync.set({ v_name : new_vehicle.string()});
+chrome.storage.sync.set(tmp_obj);
+
+GETTERS
+=======
+controller.pull(tmp)
+controller.pull(tmp))
+controller.pull(v_id)
+
+
+MEMORY OVERVIEW
+===============
+name : string
+    Name of user
+price : string
+    Current price of gas
+num : int 
+    Number of vehicles saved in memory
+selected : Vehicle object
+    Currently selected vehicle
+ptr : int
+    Index of next available space in 
+vehicles : Vehicle

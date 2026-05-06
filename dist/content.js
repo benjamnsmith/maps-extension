@@ -18,7 +18,7 @@ const getDistances = (timeout = 10000) => {
             }
         }
 
-        const pattern = /\d+ miles$/;
+        const pattern = /^\d+(\.\d+)? miles$/;
     
         let results = []
     
@@ -82,32 +82,51 @@ function handleReject(err){
     throw err;
 }
 
-
 function handlePage() {
-    const gas_price_prom = chrome.storage.sync.get('price');
+    chrome.storage.sync.get('price').then( (price_data) => {
+        gas_price = parseFloat(price_data.price.replace('$', ''));
 
-    gas_price_prom.then( (data) => {
-        gas_price = data.price;
-
-        const dist_prom = getDistances();
-
-        dist_prom.then( (dists) => {
+        getDistances().then( (dists_data) => {
             console.log("getDistance got");
-            console.log(dists);
-            const future_data = chrome.storage.sync.get('selected');
-
-            future_data.then((data) => {
-
-                if (data.selected === undefined){
-                    handleReject(data);
+            console.log(dists_data);
+            chrome.storage.sync.get('sel').then( (sel_data) => {
+                if (sel_data.sel === undefined){
+                    handleReject(sel_data);
+                } else {
+                    handleData(JSON.parse(sel_data.sel), dists_data)
                 }
-                else {
-                    handleData(data.selected, dists);
-                }
-        
-            }, handleReject); 
+            })
         })
     })
+
+
+
+
+
+    // const gas_price_prom = chrome.storage.sync.get('price');
+
+    // gas_price_prom.then( (data) => {
+    //     gas_price = data.price;
+
+    //     const dist_prom = getDistances();
+
+    //     dist_prom.then( (dists) => {
+    //         console.log("getDistance got");
+    //         console.log(dists);
+    //         const future_data = chrome.storage.sync.get('selected');
+
+    //         future_data.then((data) => {
+
+    //             if (data.selected === undefined){
+    //                 handleReject(data);
+    //             }
+    //             else {
+    //                 handleData(data.selected, dists);
+    //             }
+        
+    //         }, handleReject); 
+    //     })
+    // })
     
 }
 

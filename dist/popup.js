@@ -37,27 +37,18 @@ function displayInfo(user_data){
 2) Whether or not the user has any vehicles saved (and thus has one selected) */
  function render(){
 
-    // LOGIN CHECK
-    const user = chrome.storage.sync.get("user");
-    
-    user.then( (data) => {
-      console.log(data.user);
-      if (data.user === undefined){
+    chrome.storage.sync.get(["name", "sel"]).then((data) => {
+      if (data.name === undefined) {
         hideInfo();
-      } else {
-        displayName(data.user);
+        return;
       }
-    });
 
-    // VEHICLES CHECK
-    const data =  chrome.storage.sync.get("selected");
+      displayName(data.name);
 
-    data.then( (vehicle_obj) => {
-      console.log(vehicle_obj.selected);
-      if (vehicle_obj.selected === undefined){
+      if (data.sel === undefined) {
         hideInfo();
       } else {
-        displayInfo(vehicle_obj.selected);
+        displayInfo(JSON.parse(data.sel));
       }
     });
 }
