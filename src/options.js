@@ -1,394 +1,364 @@
 // OPTIONS.JS
-// handle form submissions, data saving, data changing
-// all data should be passed to background.js upon save
-// utilize chrome storage so all scripts can access data
-
 import { Vehicle } from "./vehicles";
 
-// =============================================
-// GLOBALS =====================================
-// DOM items
-const vehicle_items = document.querySelectorAll(".vehicle_item");
-const new_car_button = document.querySelector(".new_car_button");
-const new_car_form = document.querySelector(".new_car_form");
-const name_entry = document.querySelector("#name");
-const welcome_message = document.querySelector("#form_header");
-var fields = document.querySelectorAll(".inp");
-const update_button = document.querySelector(".vehicle_update");
-const cancel_update_button = document.querySelector(".cancel_update");
-const submit_vehicle = document.querySelector(".vehicle_submit");
-const vehicle_cancel = document.querySelector(".vehicle_cancel");
-const gas_price = document.querySelector("#gas_price");
+// ── DOM refs ──────────────────────────────────────────────────────────────────
+const gas_price_input = document.querySelector("#gas_price");
+const eia_key_input   = document.querySelector("#eia_key");
+const price_display   = document.querySelector("#price_display");
+const vehicle_grid    = document.querySelector("#vehicle_grid");
+const num_vehicles_el = document.querySelector("#num_vehicles");
+const inline_form     = document.querySelector("#inline_form");
+const make_input      = document.querySelector("#make");
+const model_input     = document.querySelector("#model");
+const mpg_input       = document.querySelector("#mpg");
+const fuel_type_sel   = document.querySelector("#fuel_type");
+const save_btn        = document.querySelector(".vehicle_save");
+const cancel_btn      = document.querySelector(".vehicle_cancel");
+const delete_btn      = document.querySelector(".vehicle_delete");
+const clear_btn       = document.querySelector(".clear");
+const warning_el      = document.querySelector(".warning");
+const show_co2_cb     = document.querySelector("#show_co2");
+const history_list    = document.querySelector("#history_list");
+const history_count   = document.querySelector("#history_count");
+const history_empty   = document.querySelector("#history_empty");
+const clear_history   = document.querySelector("#clear_history");
 
-// Local state (mirrors Chrome storage, updated on write, loaded on init)
+// ── State ─────────────────────────────────────────────────────────────────────
 var state = {
-  name: null,
   price: null,
   num: 0,
   sel: null,
-  vehicles: []
+  vehicles: [],
+  eiaKey: null
 };
 
-var cur_selected = {};
-const info_strings = ["make", "model", "mpg"];
-const display_strings = ["Make", "Model", "MPG"];
-const text_color = "#353839";
-// =============================================
+var formMode = null;
+var editingVehicle = null;
+var clearConfirm = false;
 
+const FUEL_LABELS = { regular: 'Regular', midgrade: 'Midgrade', premium: 'Premium', diesel: 'Diesel' };
 
-// Load all state from Chrome storage, then render
+// ── Init ──────────────────────────────────────────────────────────────────────
 function init() {
-  chrome.storage.sync.get(null).then((data) => {
-    state.name = data.name || null;
-    state.price = data.price || null;
-    state.num = parseInt(data.num) || 0;
-    state.sel = data.sel ? JSON.parse(data.sel) : null;
-
+  Promise.all([
+    chrome.storage.sync.get(null),
+    chrome.storage.local.get('fuelPrices')
+  ]).then(([syncData, localData]) => {
+    state.price    = syncData.price || null;
+    state.num      = parseInt(syncData.num) || 0;
+    state.sel      = syncData.sel ? JSON.parse(syncData.sel) : null;
+    state.eiaKey   = syncData.eiaApiKey || null;
     state.vehicles = [];
+
     for (let i = 0; i < state.num; i++) {
-      if (data["v" + i]) {
-        state.vehicles[i] = JSON.parse(data["v" + i]);
-      }
+      if (syncData["v" + i]) state.vehicles[i] = JSON.parse(syncData["v" + i]);
     }
 
-    if (state.sel) {
-      cur_selected = state.sel;
-    }
+    if (state.eiaKey) eia_key_input.placeholder = "API key saved";
+    if (localData.fuelPrices) renderPriceDisplay(localData.fuelPrices);
+    show_co2_cb.checked = syncData.showCO2 !== false; // default true
 
     render();
+    renderHistory();
   });
 }
 
-
-// POPUP WINDOW FUNCTIONS
+// ── Render ────────────────────────────────────────────────────────────────────
 function render() {
-  for (let vehicle of vehicle_items) {
-    vehicle.style.display = "none";
+  num_vehicles_el.textContent = state.num;
+
+  if (state.price) {
+    gas_price_input.placeholder = "$" + parseFloat(state.price).toFixed(2) + " per gallon";
   }
 
-  if (state.name && state.price) {
-    welcome_message.innerText = "Welcome back, " + state.name + "!";
-    name_entry.placeholder = state.name;
-    gas_price.placeholder = "$" + state.price + " per gallon";
-    new_car_button.disabled = false;
+  renderGrid();
+}
 
-    console.log(`There are ${state.num} car/s in memory`);
-    document.querySelector("#num_vehicles").innerText = state.num;
+function renderGrid() {
+  vehicle_grid.innerHTML = "";
 
-    for (var i = 0; i < state.num; i++) {
-      vehicle_items[i].style.display = "grid";
-      const v = state.vehicles[i];
-      vehicle_items[i].childNodes[2].innerText = v.make + " " + v.model + " (" + v.mpg + " MPG)";
-      if (state.sel && state.sel.id === v.id) {
-        vehicle_items[i].style.color = "red";
-      } else {
-        vehicle_items[i].style.color = text_color;
-      }
+  state.vehicles.forEach((v) => {
+    const card = document.createElement("div");
+    card.className = "vehicle_item" + (state.sel && state.sel.id === v.id ? " selected" : "");
+    card.dataset.id = v.id;
+    const fuelLabel = FUEL_LABELS[v.fuelType] || 'Regular';
+    card.innerHTML = `
+      <span class="fa-solid fa-car-side"></span>
+      <p class="v-name">${v.make} ${v.model}</p>
+      <p class="v-mpg">${v.mpg} MPG &middot; ${fuelLabel}</p>
+    `;
+    vehicle_grid.appendChild(card);
+  });
+
+  if (state.num < 6) {
+    const addCard = document.createElement("div");
+    addCard.className = "vehicle_item add-card";
+    addCard.id = "add-vehicle-card";
+    addCard.innerHTML = `<span class="fa-solid fa-plus"></span><p>Add vehicle</p>`;
+    vehicle_grid.appendChild(addCard);
+  }
+}
+
+function renderPriceDisplay(fp) {
+  if (!fp || !fp.regular) { price_display.textContent = ""; return; }
+  const date = fp.fetchedAt ? new Date(fp.fetchedAt).toLocaleDateString() : '';
+  price_display.innerHTML =
+    `<span class="price-tag">Regular $${fp.regular?.toFixed(2)}</span>` +
+    `<span class="price-tag">Midgrade $${fp.midgrade?.toFixed(2)}</span>` +
+    `<span class="price-tag">Premium $${fp.premium?.toFixed(2)}</span>` +
+    `<span class="price-tag">Diesel $${fp.diesel?.toFixed(2)}</span>` +
+    (date ? `<span class="price-date">Updated ${date}</span>` : '');
+}
+
+// ── Trip history ──────────────────────────────────────────────────────────────
+function renderHistory() {
+  chrome.storage.local.get('tripHistory').then((data) => {
+    const trips = data.tripHistory || [];
+    history_count.textContent = trips.length;
+
+    if (trips.length === 0) {
+      history_list.innerHTML = "";
+      history_empty.style.display = "block";
+      return;
     }
+
+    history_empty.style.display = "none";
+    history_list.innerHTML = trips.map((t) => {
+      const d = new Date(t.date);
+      const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const origin = truncate(t.origin, 20);
+      const dest   = truncate(t.destination, 20);
+      const rt     = t.roundTrip ? ' RT' : '';
+      return `
+        <div class="history-row">
+          <span class="h-date">${dateStr}</span>
+          <span class="h-route">${origin} → ${dest}</span>
+          <span class="h-stats">${t.distance.toFixed(1)} mi${rt} &nbsp; $${t.cost.toFixed(2)} &nbsp; ${t.co2.toFixed(1)}kg CO₂</span>
+        </div>`;
+    }).join('');
+  });
+}
+
+function truncate(str, max) {
+  if (!str) return '?';
+  return str.length > max ? str.slice(0, max - 1) + '…' : str;
+}
+
+// ── Inline form ───────────────────────────────────────────────────────────────
+function openAddForm() {
+  formMode = 'add';
+  editingVehicle = null;
+  make_input.value    = "";
+  model_input.value   = "";
+  mpg_input.value     = "";
+  fuel_type_sel.value = "regular";
+  delete_btn.style.display = "none";
+  inline_form.style.display = "block";
+  make_input.focus();
+}
+
+function openEditForm(vehicle) {
+  formMode = 'edit';
+  editingVehicle = vehicle;
+  make_input.value    = vehicle.make;
+  model_input.value   = vehicle.model;
+  mpg_input.value     = vehicle.mpg;
+  fuel_type_sel.value = vehicle.fuelType || 'regular';
+  delete_btn.style.display = "inline-block";
+  inline_form.style.display = "block";
+  make_input.focus();
+}
+
+function closeForm() {
+  formMode = null;
+  editingVehicle = null;
+  inline_form.style.display = "none";
+  make_input.value  = "";
+  model_input.value = "";
+  mpg_input.value   = "";
+}
+
+// ── Save / update / delete ────────────────────────────────────────────────────
+function handleSave() {
+  const make     = make_input.value.trim();
+  const model    = model_input.value.trim();
+  const mpg      = mpg_input.value.trim();
+  const fuelType = fuel_type_sel.value;
+
+  if (!make || !model || !mpg) return;
+
+  if (formMode === 'add') {
+    const v = new Vehicle(make, model, mpg, state.num, fuelType);
+    state.vehicles.push(v);
+    state.num++;
+    state.sel = v;
+    chrome.storage.sync.set({
+      ["v" + v.id]: JSON.stringify(v),
+      num: state.num,
+      sel: JSON.stringify(v)
+    });
   } else {
-    welcome_message.innerText = "Add your info";
-    document.querySelector("#num_vehicles").innerText = 0;
-    name_entry.placeholder = "Name";
-    new_car_button.disabled = true;
-    chrome.storage.sync.set({ num: 0 });
+    const v = new Vehicle(make, model, mpg, editingVehicle.id, fuelType);
+    state.vehicles[v.id] = v;
+    if (state.sel && state.sel.id === v.id) state.sel = v;
+    chrome.storage.sync.set({
+      ["v" + v.id]: JSON.stringify(v),
+      sel: state.sel ? JSON.stringify(state.sel) : undefined
+    });
   }
-}
 
-function clearForm() {
-  for (var i = 0; i < fields.length; i++) {
-    fields[i].value = "";
-    fields[i].placeholder = display_strings[i];
-  }
-}
-
-function handleSubmit(event) {
-  event.preventDefault();
-
-  const new_vehicle = new Vehicle(fields[0].value, fields[1].value, fields[2].value, state.num);
-  const key = "v" + state.num;
-
-  chrome.storage.sync.set({ [key]: JSON.stringify(new_vehicle) });
-  chrome.storage.sync.set({ sel: JSON.stringify(new_vehicle) });
-
-  state.vehicles[state.num] = new_vehicle;
-  state.num++;
-  state.sel = new_vehicle;
-  cur_selected = new_vehicle;
-
-  chrome.storage.sync.set({ num: state.num });
-
-  clearForm();
+  closeForm();
   render();
 }
 
+function deleteVehicle() {
+  if (!editingVehicle) return;
 
-function deleteVehicle(event) {
-  event.preventDefault();
-
-  const del_id = cur_selected.id;
-
-  // Remove from local array and compact
+  const del_id = editingVehicle.id;
   state.vehicles.splice(del_id, 1);
   state.num--;
 
-  // Rebuild vehicle keys with updated ids
   const updates = { num: state.num };
   for (let i = 0; i < state.vehicles.length; i++) {
     state.vehicles[i].id = i;
     updates["v" + i] = JSON.stringify(state.vehicles[i]);
   }
-  // Remove the now-extra last key
   chrome.storage.sync.remove("v" + state.num);
 
-  // Update selected vehicle
   if (state.sel && state.sel.id === del_id) {
     if (state.vehicles.length > 0) {
       state.sel = state.vehicles[0];
-      cur_selected = state.sel;
       updates.sel = JSON.stringify(state.sel);
     } else {
       state.sel = null;
-      cur_selected = {};
       chrome.storage.sync.remove("sel");
     }
   }
 
   chrome.storage.sync.set(updates);
-
-  hideInfo();
+  closeForm();
   render();
 }
 
+// ── Event delegation for vehicle grid ─────────────────────────────────────────
+vehicle_grid.addEventListener("click", (e) => {
+  const card = e.target.closest(".vehicle_item");
+  if (!card) return;
 
-function handleUpdate() {
-  var v_id = cur_selected.id;
+  if (card.id === "add-vehicle-card") {
+    openAddForm();
+    return;
+  }
 
-  var new_vehicle = new Vehicle(
-    fields[0].value ? fields[0].value : fields[0].placeholder,
-    fields[1].value ? fields[1].value : fields[1].placeholder,
-    fields[2].value ? fields[2].value : fields[2].placeholder.split(" ")[0],
-    v_id
-  );
+  const id = parseInt(card.dataset.id);
+  const vehicle = state.vehicles[id];
+  if (!vehicle) return;
 
-  const key = "v" + v_id;
-  chrome.storage.sync.set({ [key]: JSON.stringify(new_vehicle) });
-  chrome.storage.sync.set({ sel: JSON.stringify(new_vehicle) });
+  if (formMode === 'edit' && editingVehicle && editingVehicle.id === id) {
+    closeForm();
+    return;
+  }
 
-  state.vehicles[v_id] = new_vehicle;
-  state.sel = new_vehicle;
-  cur_selected = new_vehicle;
+  state.sel = vehicle;
+  chrome.storage.sync.set({ sel: JSON.stringify(vehicle) });
 
-  hideInfo();
-  showInfo();
+  vehicle_grid.querySelectorAll(".vehicle_item").forEach(c => c.classList.remove("selected"));
+  card.classList.add("selected");
+
+  openEditForm(vehicle);
+});
+
+// ── Gas price ─────────────────────────────────────────────────────────────────
+function saveGasPrice(value) {
+  const cleaned = value.replace('$', '').trim();
+  if (!cleaned || isNaN(parseFloat(cleaned))) return;
+  state.price = cleaned;
+  chrome.storage.sync.set({ price: cleaned });
+  gas_price_input.value = "";
+  gas_price_input.placeholder = "$" + parseFloat(cleaned).toFixed(2) + " per gallon";
+}
+
+gas_price_input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") saveGasPrice(gas_price_input.value);
+});
+gas_price_input.addEventListener("blur", () => {
+  if (gas_price_input.value !== "") saveGasPrice(gas_price_input.value);
+});
+
+// ── EIA API key ───────────────────────────────────────────────────────────────
+function saveEiaKey(value) {
+  const key = value.trim();
+  if (!key) return;
+  state.eiaKey = key;
+  chrome.storage.sync.set({ eiaApiKey: key });
+  eia_key_input.value = "";
+  eia_key_input.placeholder = "API key saved";
+}
+
+eia_key_input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") saveEiaKey(eia_key_input.value);
+});
+eia_key_input.addEventListener("blur", () => {
+  if (eia_key_input.value !== "") saveEiaKey(eia_key_input.value);
+});
+
+// Update price display when background fetches new prices
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.fuelPrices) {
+    renderPriceDisplay(changes.fuelPrices.newValue);
+  }
+});
+
+// ── CO2 toggle ────────────────────────────────────────────────────────────────
+show_co2_cb.addEventListener("change", () => {
+  chrome.storage.sync.set({ showCO2: show_co2_cb.checked });
+});
+
+// ── Form buttons ──────────────────────────────────────────────────────────────
+save_btn.addEventListener("click", handleSave);
+cancel_btn.addEventListener("click", closeForm);
+delete_btn.addEventListener("click", deleteVehicle);
+
+// ── History ───────────────────────────────────────────────────────────────────
+clear_history.addEventListener("click", () => {
+  chrome.storage.local.set({ tripHistory: [] });
+  renderHistory();
+});
+
+// ── Clear all data ────────────────────────────────────────────────────────────
+clear_btn.addEventListener("click", () => {
+  if (!clearConfirm) {
+    clearConfirm = true;
+    clear_btn.textContent = "Yes, clear everything";
+    clear_btn.classList.add("confirming");
+    warning_el.style.display = "block";
+    return;
+  }
+
+  chrome.storage.sync.clear();
+  chrome.storage.local.remove('tripHistory');
+  state = { price: null, num: 0, sel: null, vehicles: [], eiaKey: null };
+  gas_price_input.value = "";
+  gas_price_input.placeholder = "e.g. $3.89";
+  eia_key_input.placeholder = "Paste your EIA API key";
+  price_display.textContent = "";
+  clearConfirm = false;
+  clear_btn.textContent = "Clear all data";
+  clear_btn.classList.remove("confirming");
+  warning_el.style.display = "none";
+  closeForm();
   render();
-}
+  renderHistory();
+});
 
-
-function hideInfo() {
-  clearForm();
-  document.querySelector("h4").innerText = "New vehicle info";
-  document.querySelector(".vehicle_delete").style.display = "none";
-}
-
-function showInfo() {
-  console.log("selected:", cur_selected);
-
-  document.querySelector("h4").innerText = "Vehicle Info";
-  new_car_form.style.display = "grid";
-  new_car_button.style.display = "none";
-  submit_vehicle.style.display = "none";
-  vehicle_cancel.style.display = "none";
-  update_button.style.display = "inline";
-  cancel_update_button.style.display = "inline";
-  document.querySelector(".vehicle_delete").style.display = "inline";
-
-  for (var i = 0; i < fields.length; i++) {
-    fields[i].value = "";
-    fields[i].placeholder = cur_selected[info_strings[i]];
-    if (info_strings[i] === "mpg") {
-      fields[i].placeholder += " MPG";
-    }
+document.addEventListener("click", (e) => {
+  if (clearConfirm && !e.target.closest(".danger-zone")) {
+    clearConfirm = false;
+    clear_btn.textContent = "Clear all data";
+    clear_btn.classList.remove("confirming");
+    warning_el.style.display = "none";
   }
-}
+});
 
-
-function vehicleClick(e) {
-  var v_id;
-  if (!e.target.className.includes("vehicle_item")) {
-    v_id = e.target.parentNode.className.split(" ")[1];
-  } else {
-    v_id = e.target.className.split(" ")[1];
-  }
-
-  const idx = parseInt(v_id.replace("v", ""));
-  const selected = state.vehicles[idx];
-
-  if (cur_selected.id !== selected.id) {
-    chrome.storage.sync.set({ sel: JSON.stringify(selected) });
-    state.sel = selected;
-    console.log(`The new MPG used will be ${selected.mpg}`);
-  }
-
-  cur_selected = selected;
-  showInfo();
-  render();
-}
-
-function showHide() {
-  if (new_car_form.style.display === "") {
-    new_car_form.style.display = "none";
-  }
-
-  if (new_car_form.style.display !== "none") {
-    new_car_button.style.display = "inline";
-    new_car_form.style.display = "none";
-    cancel_update_button.style.display = "inline";
-    update_button.style.display = "inline";
-  } else {
-    new_car_form.style.display = "flex";
-    new_car_button.style.display = "none";
-    document.querySelector("#make").value = "";
-    document.querySelector("#model").value = "";
-    document.querySelector("#mpg").value = "";
-    cancel_update_button.style.display = "none";
-    update_button.style.display = "none";
-    submit_vehicle.style.display = "inline";
-    vehicle_cancel.style.display = "inline";
-  }
-}
-
-
-// RUN UPON EXTENSION INIT
+// ── Start ─────────────────────────────────────────────────────────────────────
 init();
-
-
-// EVENT LISTENERS
-// name entry submit handlers - enter key or blur
-name_entry.addEventListener("keypress", (e) => {
-  if (e.keyCode === 13 && name_entry.value !== "") {
-    chrome.storage.sync.set({ name: name_entry.value });
-    state.name = name_entry.value;
-    render();
-  }
-});
-
-name_entry.addEventListener("blur", (e) => {
-  e.preventDefault();
-  if (name_entry.value !== "") {
-    chrome.storage.sync.set({ name: name_entry.value });
-    state.name = name_entry.value;
-    render();
-  }
-});
-
-// gas price submit handlers - enter key or blur
-gas_price.addEventListener("keypress", (e) => {
-  if (e.keyCode === 13 && gas_price.value !== "") {
-    chrome.storage.sync.set({ price: gas_price.value });
-    state.price = gas_price.value;
-    gas_price.value = "";
-    render();
-  }
-});
-
-gas_price.addEventListener("blur", (e) => {
-  e.preventDefault();
-  if (gas_price.value !== "") {
-    chrome.storage.sync.set({ price: gas_price.value });
-    state.price = gas_price.value;
-    gas_price.value = "";
-    render();
-  }
-});
-
-// add vehicle button
-new_car_button.addEventListener("click", (e) => {
-  e.preventDefault();
-  showHide();
-});
-
-// submit new vehicle button
-submit_vehicle.addEventListener("click", (e) => {
-  e.preventDefault();
-  handleSubmit(e);
-  showHide();
-});
-
-// cancel vehicle add button
-vehicle_cancel.addEventListener("click", (e) => {
-  e.preventDefault();
-  hideInfo();
-  showHide();
-});
-
-update_button.addEventListener("click", (e) => {
-  e.preventDefault();
-  handleUpdate();
-});
-
-cancel_update_button.addEventListener("click", (e) => {
-  e.preventDefault();
-  hideInfo();
-  showHide();
-});
-
-document.querySelector(".vehicle_delete").addEventListener("click", (e) => {
-  deleteVehicle(e);
-});
-
-document.querySelector(".mem_dump").addEventListener("click", (e) => {
-  e.preventDefault();
-  chrome.storage.sync.get(null).then((data) => {
-    console.log("CHROME STORAGE:", data);
-  });
-});
-
-
-var double_check = 0;
-
-document.querySelector(".clear").addEventListener("click", (e) => {
-  e.preventDefault();
-  switch (double_check) {
-    case 0:
-      double_check = 1;
-      e.target.style.color = "red";
-      e.target.textContent = "Yes I'm sure";
-      document.querySelector(".warning").style.display = "block";
-      document.querySelector(".close").textContent = "Cancel";
-      break;
-    case 1:
-      double_check = 0;
-      document.querySelector(".warning").style.display = "none";
-      e.target.style.color = "black";
-      e.target.textContent = "Clear data";
-      chrome.storage.sync.clear();
-      state = { name: null, price: null, num: 0, sel: null, vehicles: [] };
-      cur_selected = {};
-      name_entry.value = "";
-      gas_price.placeholder = "Price per gallon";
-      new_car_form.style.display = "none";
-      new_car_button.style.display = "block";
-      render();
-      break;
-  }
-});
-
-document.querySelector(".close").addEventListener("click", (e) => {
-  e.preventDefault();
-  switch (double_check) {
-    case 1:
-      double_check = 0;
-      document.querySelector(".warning").style.display = "none";
-      document.querySelector(".clear").style.color = "black";
-      document.querySelector(".clear").textContent = "Clear data";
-      e.target.textContent = "Close";
-      break;
-    case 0:
-      window.close();
-      return false;
-  }
-});
-
-for (let vehicle of vehicle_items) {
-  vehicle.addEventListener("click", (e) => vehicleClick(e));
-}

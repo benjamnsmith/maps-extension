@@ -1,146 +1,167 @@
 // CONTENT.JS
-// Run in the context of the webpage only after the DOM is fully loaded,
-// as specified in manifest.json ()
+// Injects trip cost (and optionally CO2) next to distance on Google Maps directions pages.
 
-var saved_mpg = -10000;
-var gas_price = -10;
+const DISTANCE_PATTERN   = /^\d+(\.\d+)? miles$/;
+const CO2_KG_PER_GALLON  = { regular: 8.887, midgrade: 8.887, premium: 8.887, diesel: 10.180 };
+const TRIP_HISTORY_ENABLED = false; // feature flag — enable when ready
 
+var fuelPrices  = {};
+var manualPrice = -1;
+var vehicle     = null;
+var roundTrip   = false;
+var showCO2     = true;
 
-// dom polling code based on code from so
-const getDistances = (timeout = 10000) => {
-    return new Promise((resolve, reject) => {
-      const startTime = Date.now();
-      const tryQuery = () => {
-        let matches = [];
-        for(const div of document.querySelectorAll('div')){
-            if (div.textContent.includes("miles")) {
-                matches.push(div);
-            }
+function getPrice() {
+    if (!vehicle) return -1;
+    const fp = fuelPrices[vehicle.fuelType];
+    return (fp != null && fp >= 0) ? fp : manualPrice;
+}
+
+function getMatchingDivs() {
+    return Array.from(document.querySelectorAll('div'))
+        .filter(div => DISTANCE_PATTERN.test(div.textContent) && !div.textContent.includes('($'));
+}
+
+function stripInjected() {
+    // Remove standalone CO2 labels
+    document.querySelectorAll('.tc-co2').forEach(el => el.remove());
+    // Strip cost suffix from distance divs
+    document.querySelectorAll('div').forEach(div => {
+        if (/^\d[\d,.]* miles \(\$/.test(div.textContent)) {
+            div.textContent = div.textContent.replace(/ \(\$.*\)$/, '');
         }
-
-        const pattern = /^\d+(\.\d+)? miles$/;
-    
-        let results = []
-    
-        // of the retrieved divs, only get the ones that match the pattern above (the ones we want to change)
-        for (const match of matches) {
-            if (pattern.test(match.textContent)) {
-                results.push(match);
-            }
-        }
-        if (matches.length) resolve(results); // Found the element
-        else if (Date.now() - startTime > timeout) resolve(null); // Give up eventually
-        else setTimeout(tryQuery, 10); // check again every 10ms
-      }
-      tryQuery(); // Initial check
     });
-  };
-
-
-function calculateCost(distance) {
-    console.log(`calculateCost() with distance as ${distance}, mpg as ${saved_mpg}, and gas price as ${gas_price}`);
-    if (saved_mpg < 0) {
-        console.log("There was an error");
-        throw "NegativeMPG"
-    }
-    var percent = distance / saved_mpg;
-  
-    return (percent * gas_price).toFixed(2);
 }
 
-function clean(number_string){
-    var res = "";
-    for (const c of number_string){
-        if (c === ","){
-            continue;    
-        }
-        res += c;
-    }
-    return parseFloat(res);
-}
+function injectCosts() {
+    if (!vehicle || getPrice() < 0) return;
 
+    const dists = getMatchingDivs();
+    if (dists.length === 0) return;
 
-function handleData(vehicle_info, dists){
-    saved_mpg = vehicle_info.mpg;
+    const price = getPrice();
+    const mult  = roundTrip ? 2 : 1;
+    const rt    = roundTrip ? ' RT' : '';
+    const co2PerGal = CO2_KG_PER_GALLON[vehicle.fuelType] || CO2_KG_PER_GALLON.regular;
 
-    var costs = [];
-    var text = [];
     for (const dist of dists) {
-        text.push(dist.textContent);
-        var d_int = dist.textContent.split(" ")[0];
-        var cleaned = clean(d_int);
-        costs.push(calculateCost(cleaned));
+        const text     = dist.textContent;
+        const distance = parseFloat(text.replace(/,/g, '').split(' ')[0]);
+        const gallons  = (distance / vehicle.mpg) * mult;
+        const cost     = (gallons * price).toFixed(2);
+
+        dist.textContent = `${text} ($${cost}${rt})`;
+
+        if (showCO2) {
+            const co2kg = (gallons * co2PerGal).toFixed(1);
+            const co2el = document.createElement('div');
+            co2el.className = 'tc-co2';
+            co2el.style.cssText = 'font-size:0.78em;opacity:0.6;margin-top:1px;font-family:inherit';
+            co2el.textContent = `${co2kg}kg CO2`;
+            dist.insertAdjacentElement('afterend', co2el);
+        }
     }
-    for (idx in costs) {
-        console.log(`${text[idx]} will cost ${costs[idx]}`);
-        dists[idx].textContent = text[idx] + " ($" + costs[idx] + ")";
+
+    if (TRIP_HISTORY_ENABLED) logTrip(dists, price, mult, co2PerGal);
+}
+
+function reinjectCosts() {
+    stripInjected();
+    injectCosts();
+}
+
+// ── Trip history (disabled) ───────────────────────────────────────────────────
+function parseRoute() {
+    const match = location.pathname.match(/\/maps\/dir\/([^/]+)\/([^/]+)/);
+    if (!match) return { origin: 'Unknown', destination: 'Unknown' };
+    return {
+        origin:      decodeURIComponent(match[1].replace(/\+/g, ' ')),
+        destination: decodeURIComponent(match[2].replace(/\+/g, ' '))
+    };
+}
+
+function logTrip(dists, price, mult, co2PerGal) {
+    let maxDist = 0;
+    for (const dist of dists) {
+        const d = parseFloat(dist.textContent.replace(/,/g, '').split(' ')[0]);
+        if (d > maxDist) maxDist = d;
     }
+
+    const gallons = (maxDist / vehicle.mpg) * mult;
+    const cost    = parseFloat((gallons * price).toFixed(2));
+    const co2     = parseFloat((gallons * co2PerGal).toFixed(2));
+    const { origin, destination } = parseRoute();
+
+    const trip = {
+        date:        new Date().toISOString(),
+        distance:    parseFloat((maxDist * mult).toFixed(1)),
+        cost, co2, roundTrip, origin, destination,
+        vehicle: { make: vehicle.make, model: vehicle.model, mpg: vehicle.mpg, fuelType: vehicle.fuelType }
+    };
+
+    chrome.storage.local.get('tripHistory').then((data) => {
+        const history = data.tripHistory || [];
+        history.unshift(trip);
+        if (history.length > 50) history.splice(50);
+        chrome.storage.local.set({ tripHistory: history });
+    });
 }
 
-function handleReject(err){
-    console.log(err);
-    throw err;
-}
-
-function handlePage() {
-    chrome.storage.sync.get('price').then( (price_data) => {
-        gas_price = parseFloat(price_data.price.replace('$', ''));
-
-        getDistances().then( (dists_data) => {
-            console.log("getDistance got");
-            console.log(dists_data);
-            chrome.storage.sync.get('sel').then( (sel_data) => {
-                if (sel_data.sel === undefined){
-                    handleReject(sel_data);
-                } else {
-                    handleData(JSON.parse(sel_data.sel), dists_data)
-                }
-            })
-        })
-    })
-
-
-
-
-
-    // const gas_price_prom = chrome.storage.sync.get('price');
-
-    // gas_price_prom.then( (data) => {
-    //     gas_price = data.price;
-
-    //     const dist_prom = getDistances();
-
-    //     dist_prom.then( (dists) => {
-    //         console.log("getDistance got");
-    //         console.log(dists);
-    //         const future_data = chrome.storage.sync.get('selected');
-
-    //         future_data.then((data) => {
-
-    //             if (data.selected === undefined){
-    //                 handleReject(data);
-    //             }
-    //             else {
-    //                 handleData(data.selected, dists);
-    //             }
-        
-    //         }, handleReject); 
-    //     })
-    // })
-    
-}
-
-
-
-/* 
-Wait until all of the objects of the DOM have loaded before trying to access them
-Flow of execution: 
-* readystate: interactive (document event)
-* DOMContentLoaded (document event)
-* readystate: complete (document event)
-* load (window event)
-*/
-
-window.addEventListener('load', (event) => {
-    handlePage();
+// ── DOM observer ──────────────────────────────────────────────────────────────
+let injectDebounce = null;
+const domObserver = new MutationObserver(() => {
+    clearTimeout(injectDebounce);
+    injectDebounce = setTimeout(injectCosts, 200);
 });
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+function init() {
+    Promise.all([
+        chrome.storage.sync.get(['price', 'sel', 'roundTrip', 'showCO2']),
+        chrome.storage.local.get('fuelPrices')
+    ]).then(([syncData, localData]) => {
+        if (!syncData.sel) {
+            console.warn('TripCost: no vehicle configured.');
+            return;
+        }
+
+        vehicle     = JSON.parse(syncData.sel);
+        roundTrip   = syncData.roundTrip || false;
+        showCO2     = syncData.showCO2 !== false; // default true
+        manualPrice = syncData.price ? parseFloat(syncData.price.replace('$', '')) : -1;
+
+        if (localData.fuelPrices) {
+            const fp = localData.fuelPrices;
+            fuelPrices = { regular: fp.regular, midgrade: fp.midgrade, premium: fp.premium, diesel: fp.diesel };
+        }
+
+        injectCosts();
+        domObserver.observe(document.body, { subtree: true, childList: true });
+    });
+}
+
+// ── Storage changes ───────────────────────────────────────────────────────────
+chrome.storage.onChanged.addListener((changes, area) => {
+    let changed = false;
+
+    if (area === 'sync') {
+        if (changes.price)     { manualPrice = parseFloat(changes.price.newValue.replace('$', '')); changed = true; }
+        if (changes.sel)       { vehicle = JSON.parse(changes.sel.newValue); changed = true; }
+        if (changes.roundTrip) { roundTrip = changes.roundTrip.newValue; changed = true; }
+        if (changes.showCO2)   { showCO2 = changes.showCO2.newValue; changed = true; }
+    }
+
+    if (area === 'local' && changes.fuelPrices) {
+        const fp = changes.fuelPrices.newValue;
+        fuelPrices = { regular: fp.regular, midgrade: fp.midgrade, premium: fp.premium, diesel: fp.diesel };
+        changed = true;
+    }
+
+    if (changed) reinjectCosts();
+});
+
+if (document.readyState === 'complete') {
+    init();
+} else {
+    window.addEventListener('load', init);
+}

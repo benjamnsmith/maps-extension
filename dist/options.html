@@ -1,107 +1,104 @@
 <!DOCTYPE html>
-<html lang="en" min-width="500px">
-
-</html>
-
+<html lang="en">
 <head>
 	<meta charset="UTF-8" />
-	<meta name="viewport" />
-	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-	<title>TripCost</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>TripCost — Settings</title>
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" rel="stylesheet" />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;400&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="./styles.css" />
 </head>
-
 <body>
 	<div class="wrapper">
+
 		<div class="title section">
-			<img src="./images/gas-icon-128.png"/>
-			<h1 class="title_text">TripCost - Options</h1>
+			<img src="./images/gas-icon-128.png" alt="TripCost logo" />
+			<h1 class="title_text">TripCost</h1>
 		</div>
-		<div class="content section">
-			
-			<div class="info_display">
-				<h2 id='form_header' class="i_element">Add your info</h2>
-					<div class="user_name i_element">
-						<label for='name'></label>
-						<input type='text' id='name' placeholder='Name'></input>
-						<label for='gas_price'></label>
-						<input type='text' id='gas_price' placeholder='Price per gallon'></input>
-					</div>
-				<button class="new_car_button i_element">Add vehicle</button>
-				<div class="new_car_form i_element">
-					<form>
-						<h4>New vehicle info</h4>
-						<div class="field">
-							<label for='make'></label>
-							<input type='text' class="inp" id='make' placeholder='Make'></input>
-						</div>
-						<div class="field">
-							<label for='model'></label>
-							<input type='text' class="inp" id='model' placeholder='Model'></input>
-						</div>
-						<div class="field">
-							<label for='mpg'></label>
-							<input type='number' class="inp" id='mpg' placeholder="MPG"></input>
-						</div>
-						<div class="buttons">
-							<button class="vehicle_cancel">Cancel vehicle add</button>
-							<button class="vehicle_submit" action="submit">Submit new vehicle</button>
 
-							<button class="cancel_update">Close info</button>
-							<button class="vehicle_update">Update vehicle</button>
-							<div class="vehicle_delete fa-solid fa-trash fa-xl"></div>
-						</div>
-					</form>
+		<div class="price-section section">
+			<div class="price-row">
+				<div class="price-main">
+					<label for="gas_price">Manual gas price</label>
+					<input type="text" id="gas_price" placeholder="e.g. $3.89" autocomplete="off" />
+					<p class="field-hint">Used as fallback when live prices are unavailable. Press Enter or click away to save.</p>
 				</div>
-				<br>
-				<div class="global_buttons i_element">
-					<span class="warning">Heads up! Are you sure you want to clear your data?</span>
-					<button class='close' type='close'>Close</button>
-					<button class="clear">Clear data</button>
-					<button class="mem_dump">Dump</button>
+				<div class="price-live">
+					<label for="eia_key">EIA API key <a href="https://www.eia.gov/opendata/register.php" target="_blank">(get one free)</a></label>
+					<input type="text" id="eia_key" placeholder="Paste your EIA API key" autocomplete="off" />
+					<div id="price_display" class="price-display"></div>
 				</div>
 			</div>
-			<div class="vehicles_display">
-				<h2 id="form_header">Your saved vehicles (<span id="num_vehicles">0</span> / 6)</h2>
-				<div class="vehicle_grid">
-					<div class="vehicle_item v0" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-						<p></p>
-					</div>
-					<div class="vehicle_item v1" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-						<p></p>
-					</div>
-					<div class="vehicle_item v2" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-						<p></p>
-					</div>
-					<div class="vehicle_item v3" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-						<p></p>
-					</div>
-					<div class="vehicle_item v4" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-						<p></p>
-					</div>
-					<div class="vehicle_item v5" tabindex=0><span class="fa-solid fa-car-side fa-2xl"></span>
-						<p></p>
-					</div>
+			<label class="pref-row">
+				<input type="checkbox" id="show_co2" />
+				Show CO2 emissions on routes and in popup
+			</label>
+		</div>
 
-				</div> <!-- End of vehicle display grid-->
+		<div class="vehicles-section section">
+			<h2 class="section-heading">Your vehicles (<span id="num_vehicles">0</span> / 6)</h2>
+			<div class="vehicle_grid" id="vehicle_grid"></div>
+
+			<div class="inline-form" id="inline_form">
+				<div class="form-fields">
+					<div class="field">
+						<label for="make">Make</label>
+						<input type="text" class="inp" id="make" placeholder="e.g. Toyota" autocomplete="off" />
+					</div>
+					<div class="field">
+						<label for="model">Model</label>
+						<input type="text" class="inp" id="model" placeholder="e.g. Camry" autocomplete="off" />
+					</div>
+					<div class="field">
+						<label for="mpg">MPG</label>
+						<input type="number" class="inp" id="mpg" placeholder="e.g. 32" min="1" />
+					</div>
+					<div class="field">
+						<label for="fuel_type">Fuel type</label>
+						<select class="inp" id="fuel_type">
+							<option value="regular">Regular</option>
+							<option value="midgrade">Midgrade</option>
+							<option value="premium">Premium</option>
+							<option value="diesel">Diesel</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-buttons">
+					<button class="vehicle_save btn btn-primary">Save</button>
+					<button class="vehicle_cancel btn btn-secondary">Cancel</button>
+					<button class="vehicle_delete btn btn-danger">
+						<span class="fa-solid fa-trash"></span> Delete
+					</button>
+				</div>
 			</div>
-		</div> <!-- End of content section-->
-		<div class="about section">
-			<h2 class="about_header">About:</h2>
+		</div>
+
+		<details class="history-section section">
+			<summary>Trip history (<span id="history_count">0</span> trips)</summary>
+			<div id="history_list" class="history-list"></div>
+			<div class="history-empty" id="history_empty">No trips recorded yet. Get directions on Google Maps to start tracking.</div>
+			<button class="clear-history btn btn-secondary" id="clear_history">Clear history</button>
+		</details>
+
+		<details class="about section">
+			<summary>How it works</summary>
 			<ul>
-				<li>Add your name and local gas price above to get started</li>
-				<li>After that, you can save up to six vehicles with varying fuel efficiencies and names</li>
-				<li>Click on a vehicle to change its name or efficiency</li>
-				<li>Vehicles can be deleted by selecting them and preshing the trash icon</li>
+				<li>Add your local gas price or an EIA API key for live prices</li>
+				<li>Add up to six vehicles — set the fuel type so live prices apply correctly</li>
+				<li>Click a vehicle card to select it as your active vehicle</li>
+				<li>Open Google Maps and get directions — trip cost and CO₂ appear next to each route's distance</li>
+				<li>Use the round trip toggle in the popup to double the estimate</li>
 			</ul>
-			<p class="footer">Made with love and coffee in Minneapolis, MN. Check me out on <a href="https://www.github.com/benjamnsmith" target="_blank">GitHub</a>,
-				or at <a href="https://www.benjamnsmith.com" target="_blank">benjamnsmith.com</a>.</p>
-		</div>
+			<div class="danger-zone">
+				<span class="warning">This will permanently delete all your saved vehicles and settings.</span>
+				<button class="clear btn btn-danger">Clear all data</button>
+			</div>
+			<p class="footer">Made in Minneapolis, MN &mdash; <a href="https://www.github.com/benjamnsmith" target="_blank">GitHub</a></p>
+		</details>
+
 	</div>
 	<script src="main.options.js"></script>
-
 </body>
+</html>

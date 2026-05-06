@@ -1,19 +1,60 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="./index.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200&display=swap" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="./index.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="greeting section">
-        <h2 id="title">Quick Stats</h2>
-        <div class="fa-solid fa-screwdriver-wrench fa-2xl icon" tabindex="0"></div>
-      </div>
-      <div class="info section">
-        <h3 class="welcome">You're not logged in. Please enter your info to see your stats!</h3>
-        <p class="info_text">It looks like you're driving a <span class="make"></span> <span class="model"></span> with a fuel efficiency of <span class="mpg"></span>  MPG.</p>
-      </div>
-      <script src="popup.js"></script>
+
+	<div class="header">
+		<img src="./images/gas-icon-32.png" alt="TripCost" />
+		<span class="app-title">TripCost</span>
+		<button class="settings-btn" title="Open settings">
+			<span class="fa-solid fa-gear"></span>
+		</button>
+	</div>
+
+	<div class="card cpm-card" id="cpm-card">
+		<div class="stat-row">
+			<div class="stat">
+				<div class="card-label">Cost per mile</div>
+				<div class="cpm-value" id="cpm-value"></div>
+			</div>
+			<div class="stat">
+				<div class="card-label">CO2 per mile</div>
+				<div class="co2-value" id="co2-value"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="toggle-row" id="rt-row">
+		<span class="fa-solid fa-right-left toggle-icon"></span>
+		<span class="toggle-label">Round trip</span>
+		<label class="toggle-switch">
+			<input type="checkbox" id="rt-toggle" />
+			<span class="toggle-slider"></span>
+		</label>
+	</div>
+
+	<div class="card vehicles-card" id="vehicles-card">
+		<div class="card-label">Active vehicle</div>
+		<div id="vehicle-list"></div>
+		<div class="no-data" id="no-vehicles">
+			No vehicles saved &mdash; <a href="#" class="open-settings">open settings</a>
+		</div>
+	</div>
+
+	<div class="gas-footer" id="gas-footer">
+		<span class="fa-solid fa-gas-pump gas-icon"></span>
+		<span id="gas-display"></span>
+		<span class="no-data" id="no-gas" style="display:none">
+			Gas price not set &mdash; <a href="#" class="open-settings">open settings</a>
+		</span>
+	</div>
+
+	<script src="popup.js"></script>
 </body>
+</html>

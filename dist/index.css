@@ -1,82 +1,187 @@
 :root {
-    --lightsilver: #d5d8db;
-    --platinum: #e8e8e8;
-    --green: #c3ecb2;
-    --blue: #aadaff;
-    --banana: #fff2af;
-    --orange: #f6cf65;
-    --text: #222326;
-    --icon-red: #f44336;
-    --icon-grey: #cfd8dc;
-    --icon-black: #455a64
+	--lightsilver: #d5d8db;
+	--platinum:    #e8e8e8;
+	--green:       #c3ecb2;
+	--blue:        #aadaff;
+	--banana:      #fff2af;
+	--orange:      #f6cf65;
+	--text:        #353839;
 }
 
-.section {
-    width: 100%;
-    margin: 0;
-    border: solid;
-    border-color: var(--banana);
-    border-width: medium;
-    border-radius: 5px;
-    padding: 0.5rem 1rem;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    background-color: var(--platinum);
-    font-family: "Oswald";
-    display: flex;
-    flex-flow: column;
-    align-items: center;
-    width: 280px;
-    padding: 1rem;
-    box-sizing: border-box;
+	background-color: var(--platinum);
+	font-family: "Oswald", sans-serif;
+	color: var(--text);
+	width: 270px;
 }
 
-.greeting {
-    background-color: var(--green);
-    margin-bottom: 1rem;
-    display: flex;
-    flex-basis: 100%;
+/* ── Header ──────────────────────────────────────────────────────────────────── */
+.header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	background-color: var(--green);
+	padding: 0.55rem 0.75rem;
+	border-bottom: 2px solid var(--orange);
 }
 
-.icon {
-    flex-basis: 25%;
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    cursor:  pointer;
-    color: var(--icon-black);
+.header img { width: 18px; height: 18px; }
+
+.app-title {
+	flex: 1;
+	font-size: 1rem;
+	letter-spacing: 0.04em;
 }
 
-#title {
-    display: inline;
-    color: var(--text);
-    flex-basis: 75%;
-    font-size: 1.4rem;
-    font-style: bold;
+.settings-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--text);
+	font-size: 0.95rem;
+	padding: 3px 5px;
+	border-radius: 4px;
+	transition: background-color 0.15s;
+}
+.settings-btn:hover { background-color: rgba(0,0,0,0.1); }
+
+/* ── Cards ───────────────────────────────────────────────────────────────────── */
+.card {
+	padding: 0.55rem 0.75rem;
+	border-bottom: 1px solid rgba(0,0,0,0.07);
 }
 
-.info {
-    background-color: var(--blue);
-    margin: 0;
+.cpm-card    { background-color: var(--banana); }
+.vehicles-card { background-color: var(--blue); }
+
+.card-label {
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	opacity: 0.55;
+	margin-bottom: 0.2rem;
 }
 
-h3 {
-    padding: 0; 
-    margin: 0;
-    font-size: 1.2rem;
+/* ── Cost per mile + CO2 ─────────────────────────────────────────────────────── */
+.stat-row {
+	display: flex;
+	gap: 1rem;
 }
 
-ul {
-    list-style: none;
-    padding: 0 0 0 1rem;
-} 
+.stat { flex: 1; }
 
-p {
-    font-size: 1rem;
+.cpm-value {
+	font-size: 1.25rem;
+	font-weight: 400;
 }
 
-span {
-    font-style: italic;
-    font-weight: bold;
+.co2-value {
+	font-size: 1.25rem;
+	font-weight: 400;
 }
+
+/* ── Round trip toggle ───────────────────────────────────────────────────────── */
+.toggle-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.45rem 0.75rem;
+	background-color: var(--platinum);
+	border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+
+.toggle-icon { font-size: 0.8rem; opacity: 0.6; }
+
+.toggle-label {
+	flex: 1;
+	font-size: 0.85rem;
+}
+
+/* Toggle switch */
+.toggle-switch {
+	position: relative;
+	display: inline-block;
+	width: 34px;
+	height: 20px;
+	cursor: pointer;
+}
+
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+.toggle-slider {
+	position: absolute;
+	inset: 0;
+	background-color: var(--lightsilver);
+	border-radius: 20px;
+	transition: background-color 0.2s;
+}
+
+.toggle-slider::before {
+	content: "";
+	position: absolute;
+	height: 14px;
+	width: 14px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
+	border-radius: 50%;
+	transition: transform 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+	background-color: var(--orange);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+	transform: translateX(14px);
+}
+
+/* ── Vehicle list ────────────────────────────────────────────────────────────── */
+#vehicle-list { display: flex; flex-direction: column; gap: 2px; }
+
+.vehicle-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.35rem 0.5rem;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.12s;
+	border: 2px solid transparent;
+}
+
+.vehicle-row:hover { background-color: rgba(255,255,255,0.5); }
+
+.vehicle-row.active {
+	background-color: rgba(255,255,255,0.65);
+	border-color: var(--orange);
+}
+
+.v-icon { font-size: 0.95rem; opacity: 0.6; width: 16px; text-align: center; }
+
+.v-details { flex: 1; display: flex; flex-direction: column; }
+
+.v-name-text { font-size: 0.9rem; }
+.v-mpg-text  { font-size: 0.72rem; opacity: 0.6; }
+
+.v-check { font-size: 0.8rem; opacity: 0.6; }
+
+/* ── Gas footer ──────────────────────────────────────────────────────────────── */
+.gas-footer {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.45rem 0.75rem;
+	font-size: 0.8rem;
+	opacity: 0.65;
+}
+
+.gas-icon { font-size: 0.75rem; }
+
+/* ── Empty states ────────────────────────────────────────────────────────────── */
+.no-data { font-size: 0.82rem; opacity: 0.7; }
+
+a { color: var(--text); font-weight: bold; }
+a:hover { text-decoration: underline; }
